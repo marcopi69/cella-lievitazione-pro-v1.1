@@ -1,0 +1,79 @@
+# BOM — LISTA COMPONENTI CSV v1.1
+
+```
+Quantity,Designator,Part Number,Value,Footprint,Description,Supplier,Unit Cost EUR,Total EUR
+1,U1,ESP32-DEVKITC-E32,,DIP-38,ESP32-DevKitC-E (WROOM-32E),Espressif/AliExpress,12.00,12.00
+1,U2,SHT45,,0402,Sensore T/RH I2C precisione,Sensirion,10.50,10.50
+1,U3,SCD41,,0402,Sensore CO2 NDIR I2C 400-5000ppm,Sensirion,35.00,35.00
+2,U4 U5,DS18B20,,DIP-8,Sensore T 1-Wire impermeabile,Maxim,2.50,5.00
+1,U6,PCA9548A,,TSSOP-16,I2C Multiplexer 8 canali,Texas Instruments,3.50,3.50
+3,Q1 Q2 Q3,IRLZ44N,,TO-220,MOSFET N-ch logic-level 55V,Infineon,1.20,3.60
+1,Q5,BC547,,TO-92,Transistor NPN BJT,Various,0.15,0.15
+1,K1,SSR-25DA,,DIP-4 Package,Solid State Relay AC 220V 25A,Various,8.50,8.50
+1,SW1,ROTARY ENCODER,360 degrees,5-Pin,Encoder meccanico 20 pos/rev,AliExpress,2.00,2.00
+1,SW2,PUSHBUTTON-6x6,,6x6x5mm,Pulsante multifunzione NO,AliExpress,0.30,0.30
+1,SW3,PUSHBUTTON-6x6,,6x6x5mm,Pulsante reset NO,AliExpress,0.30,0.30
+1,LED1,LED-3MM,RED,3mm-THT,LED 3mm rosso stato,AliExpress,0.10,0.10
+1,U7,ILI9341 Display,,SPI Module,Display touch 3.5 inch 320x480,AliExpress,15.00,15.00
+1,FAN1,Ventola DC 12V,60mm 4-PIN,2.54 JST,Ventola ricircolo PWM 25kHz,Noctua/AliExpress,20.00,20.00
+1,HUMID1,Modulo Umidificatore,,2-PIN,Umidificatore ultrasuoni 24V,AliExpress,12.00,12.00
+1,LED_STRIP,Striscia LED RGB,,2-PIN/DIN,WS2812B RGB/RGBW 12V 60 LED,AliExpress,8.00,8.00
+1,PSU1,Alimentatore ATX,260W,ATX Connector,PSU ATX 260W +5V/+12V/+24V,AliExpress,18.00,18.00
+1,F1,Fusibile 2A SB,5x20mm 250V,5x20 Cartridge,Fusibile Slow Blow +12V,AliExpress,0.20,0.20
+1,F2,Fusibile 2A SB,5x20mm 250V,5x20 Cartridge,Fusibile Slow Blow +5V,AliExpress,0.20,0.20
+1,F_HEAT,Fusibile 1A SB,5x20mm 250V,5x20 Cartridge,Fusibile Slow Blow riscaldatore 220V,AliExpress,0.20,0.20
+1,D1,TVS Diodo,1.5KE24A,DO-201,Diodo TVS unipolare protezione picchi +12V,AliExpress,0.30,0.30
+2,D2 D3,Diodo 1N5819,,DO-41,Diodo Schottky fly-back fly-back,AliExpress,0.10,0.20
+1,C1,Capacitor,100µF 25V,Radial-10mm,Capacitor elettrolitico bulk +5V,AliExpress,0.15,0.15
+1,C2,Capacitor,470µF 25V,Radial-12mm,Capacitor elettrolitico bulk +12V,AliExpress,0.20,0.20
+1,C3,Capacitor,470µF 25V,Radial-12mm,Capacitor elettrolitico bulk +12V ventola,AliExpress,0.20,0.20
+1,C4,Capacitor,470µF 35V,Radial-12mm,Capacitor elettrolitico bulk +24V umidificatore,AliExpress,0.25,0.25
+1,C5,Capacitor,100nF 50V,0805 Ceramic,Decoupling +5V,AliExpress,0.05,0.05
+1,C6,Capacitor,100nF 50V,0805 Ceramic,Decoupling +12V,AliExpress,0.05,0.05
+1,C7,Capacitor,100nF 50V,0805 Ceramic,Decoupling +24V,AliExpress,0.05,0.05
+1,C_BOOT,Capacitor,100nF 50V,0805 Ceramic,Decoupling pulsante RESET,AliExpress,0.05,0.05
+3,R_gate,Resistor,220Ω 1/4W,0207 axial,Resistore gate MOSFET x3,AliExpress,0.02,0.06
+7,R_pull,Resistor,10kΩ 1/4W,0207 axial,Resistore pull-up/pull-down x7,AliExpress,0.02,0.14
+4,R_I2C,Resistor,4.7kΩ 1/4W,0207 axial,Resistore pull-up I2C bus x4,AliExpress,0.02,0.08
+2,R_TACH,Resistor,4.7kΩ 1/4W,0207 axial,Resistore partitore tachimetro,AliExpress,0.02,0.04
+1,R_LED,Resistor,1kΩ 1/4W,0207 axial,Resistore LED stato,AliExpress,0.02,0.02
+1,R_TACH_H,Resistor,15kΩ 1/4W,0207 axial,Resistore partitore TACH alto,AliExpress,0.02,0.02
+1,R_COL,Resistor,100kΩ 1/4W,0207 axial,Resistore pull-down collettore BC547,AliExpress,0.02,0.02
+1,HEATER,Filo Scaldante,90W 220V,,Filo autoregolante 5m 18W/m,AliExpress,12.00,12.00
+1,THERMOSTAT,Termostato Mecc.,45±5°C,Bimetallico,Protezione termica filo scaldante CRITICO,AliExpress,3.00,3.00
+1,CABLE_1W,Cavo Schermato,22AWG 5m,,Cavo 1-Wire DS18B20 schermato,AliExpress,2.00,2.00
+1,J_DS1,Connettore JST 3-pin,,2.54mm Pitch,Connettore DS18B20 sonda 1,AliExpress,0.30,0.30
+1,J_DS2,Connettore JST 3-pin,,2.54mm Pitch,Connettore DS18B20 sonda 2,AliExpress,0.30,0.30
+1,J_OLED,Connettore JST 4-pin,,2.54mm Pitch,Connettore display touch SPI,AliExpress,0.30,0.30
+1,J_ENC,Connettore JST 5-pin,,2.54mm Pitch,Connettore encoder 5-pin,AliExpress,0.40,0.40
+1,J_PSU,Connettore KF350 5-pin,,5.08mm Pitch,Connettore PSU ingresso,AliExpress,0.40,0.40
+1,J_VENTOLA,Connettore Molex 2-pin,,5.08mm Pitch,Connettore ventola +12V,AliExpress,0.50,0.50
+1,J_LED,Connettore Molex 2-pin,,5.08mm Pitch,Connettore LED strip +12V,AliExpress,0.50,0.50
+1,J_HUMID,Connettore KF350 2-pin,,5.08mm Pitch,Connettore umidificatore +24V,AliExpress,0.30,0.30
+1,J_SSR,Connettore KF350 2-pin,,5.08mm Pitch,Connettore SSR controllo,AliExpress,0.30,0.30
+1,FH1,Portafusibili 5x20,,Panel,Portafusibili F1 F2,AliExpress,0.80,0.80
+1,FH_HEAT,Portafusibili 5x20,,Panel,Portafusibili F_HEAT (220V board separata),AliExpress,0.80,0.80
+1,PCB,Scheda PCB,,100x160mm Eurocard,PCB monofaccia rame FR4,JLC-PCB,5.00,5.00
+1,,Kit Saldatura,,250g Lead-Free,Stagno piombo-free,AliExpress,3.00,3.00
+1,,Morsettiera 220V,,3-Pin 10A,Morsetti ingresso L/N/PE board 220V,AliExpress,2.00,2.00
+1,,Dissipatore Alluminio,,50x50x10mm,Dissipatore SSR (opzionale se T ambiente < 35°C),AliExpress,2.00,2.00
+1,,Grasso Termico,,10g,Grasso termico silicone per SSR,AliExpress,2.00,2.00
+1,,Kit Cavi Jumper,,22 AWG 10 colori 100m,Cavi per interconnessioni PCB,AliExpress,5.00,5.00
+1,,Connettori DuPont,,20-pin Kit,Connettori dupont (opzionale prototipo breadboard),AliExpress,1.00,1.00
+
+TOTAL ESTIMATED COST: 220.00 EUR
+
+NOTE:
+- Prezzi sono stime AliExpress/Mouser medio 2026
+- Lead time: SCD41 può essere raro, ordinare con anticipo (2-4 settimane)
+- PSU ATX: può essere ricondizionato da vecchio PC (~5-8€)
+- Ventola Noctua (20€): silenziosa; alternative economiche: Be Quiet (12€) o generiche (5€)
+- Display touch: verificare compatibilità driver ST7789 o ILI9341 con ESPHome
+- Tutti i componenti sono THT o connettori standard per facilità montaggio prototipo
+```
+
+---
+
+**Versione:** 1.1  
+**Data:** Ottobre 2026  
+**Status:** ✅ Completo, importabile in BOM manager
