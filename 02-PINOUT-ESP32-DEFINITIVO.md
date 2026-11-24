@@ -67,6 +67,27 @@
 
 Condizionali: GPIO 2, 12, 15 (strapping) solo con cautela; GPIO 1/3 se si rinuncia al debug UART.
 
+### Connettore di espansione J_EXP (sulla PCB)
+
+Un unico connettore a vite/passo 2.54 mm, 8 poli, porta fuori i pin liberi per moduli esterni (sensore livello acqua, sonda di corrente, relè, buzzer, ecc.):
+
+| Pin | Segnale | Protezione sulla PCB |
+|---|---|---|
+| 1 | +3V3 | Fusibile PTC non necessario (max 100 mA dal regolatore) |
+| 2 | GND | - |
+| 3 | EXP_IO17 (GPIO 17) | Resistenza serie 330 Ω; I/O, PWM, UART, 1-Wire |
+| 4 | EXP_IN35 (GPIO 35) | Serie 1 kΩ + 100 nF verso GND, ingresso ADC |
+| 5 | EXP_IN36 (GPIO 36) | Serie 1 kΩ + 100 nF verso GND, ingresso ADC |
+| 6 | EXP_IN39 (GPIO 39) | Serie 1 kΩ + 100 nF verso GND, ingresso ADC |
+| 7 | +5V (dopo F2) | Max 200 mA per moduli esterni |
+| 8 | GND | - |
+
+Regole d'uso:
+- I segnali sono a **3.3 V**: non applicare mai 5 V diretti ai pin (usare partitore o level shifter).
+- GPIO 35/36/39 sono solo ingressi e **senza pull-up interno**: eventuali pull-up/pull-down vanno sul modulo esterno.
+- Per sensori I²C aggiuntivi non servono questi pin: restano liberi sei canali del PCA9548A (0, 1, 2, 5, 6, 7).
+- Nel YAML, un nuovo modulo si aggiunge senza modificare l'hardware (esempio: `binary_sensor` su GPIO35 per un galleggiante).
+
 ### Riservati / non disponibili
 - **Boot:** GPIO 0, 2, 12, 15 (non toccare)
 - **Flash SPI:** GPIO 6-11 (modulo WROOM-32E)
