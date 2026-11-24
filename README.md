@@ -11,7 +11,7 @@
 - **Controllo RH:** Umidificatore ultrasuoni 24V ON/OFF o PWM
 - **Monitoraggio CO₂:** SCD41 NDIR (400-5000 ppm, ±40 ppm)
 - **Ricircolo:** Ventola 12V 4-pin PWM con tachimetro
-- **Interfaccia:** Display touch 3.5" + encoder rotativo + pulsanti
+- **Interfaccia:** Display Nextion/TJC 5" UART con touch + encoder rotativo + pulsanti
 - **Integrazione:** ESPHome + Home Assistant (Wi-Fi)
 - **Autonomia:** Completo controllo offline
 - **Sicurezza:** Termostato meccanico 45°C, fusibili, SSR con bypass
@@ -31,7 +31,7 @@
 14-SENSORI-TEMPERATURA-CO2.md SHT45, SCD41, DS18B20
 15-VENTOLA-PWM-4PIN.md       Ventola 4-pin PWM + tach
 
-20-DISPLAY-TOUCH.md          Display touch 3.5" ILI9341
+20-DISPLAY-NEXTION.md        Display Nextion/TJC 5" UART + touch
 21-ENCODER-PULSANTI.md       Encoder, pulsanti, LED stato
 
 30-ESPHOME-STRUTTURA.md      YAML firmware completo
@@ -105,7 +105,7 @@ cat BOM/cella-pro-v1.1-BOM.csv
 | Relè + Driver | ~15 | SSR, BC547, IRLZ44N, diodi |
 | Carichi | ~50 | Ventola, LED, umidificatore, filo |
 | Alimentazione | ~30 | PSU ATX, fusibili, protezioni |
-| Interfaccia | ~25 | Display touch, encoder, pulsanti |
+| Interfaccia | ~55 | Display Nextion, encoder, pulsanti |
 | PCB + Varia | ~15 | Saldatura, connettori, cavi |
 | **TOTALE** | **~210 EUR** | Senza installazione |
 
@@ -134,7 +134,7 @@ cat BOM/cella-pro-v1.1-BOM.csv
 | Sensori non trovati (I²C scan vuoto) | Verificare A0-A2 PCA9548A a GND, RST a +3.3V |
 | Riscaldatore non si accende | Controllare BC547 base (GPIO 32), R 10k verso GND |
 | Ventola non gira | Verificare GPIO 25 PWM, MOSFET Q1 |
-| Display toccato ma non risponde | Calibrare touch screen (vedi 20-DISPLAY-TOUCH.md) |
+| Display toccato ma non risponde | Verificare TX/RX non invertiti, baud 115200 e component_id Nextion (vedi 20-DISPLAY-NEXTION.md) |
 | Deriva T verso il basso | Aumentare Ki PID (vedi 31-CONTROLLO-PID.md) |
 
 ## 📞 Support

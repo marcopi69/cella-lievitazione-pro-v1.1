@@ -21,44 +21,56 @@
 | **GPIO 11** | PSRAM/Flash | - | Interno modulo | **NON usare, riservato** |
 | **GPIO 12** | ⚠️ Boot strapping | - | Lasciare floating | **NON usare per controllo** |
 | **GPIO 13** | **1-Wire DATA** | I/O | Bus DS18B20 (entrambe le sonde) | Pull-up 4.7 kΩ verso +3.3 V (obbligatorio 1-Wire) |
-| **GPIO 14** | **UART2 TX** | OUT | → RX MH-Z19C (pin 3) **DEPRECATED** | Per SCD41 non usato (I²C invece) |
+| **GPIO 14** | **UART2 TX (Display)** | OUT | → R 1kΩ → RX Nextion/TJC | 115200 baud; breve PWM al boot (ignorato dal display) |
 | **GPIO 15** | ⚠️ Boot strapping | - | Lasciare floating | **NON usare per controllo** |
 | **GPIO 16** | **LED di stato** | OUT | → R 1kΩ → Anodo LED → GND | Output digitale, 3.3V, max 40 mA |
-| **GPIO 17** | Libero | - | Disponibile per espansione futura | Esempio: secondo UART o SPI |
+| **GPIO 17** | Libero | I/O | Disponibile per espansione futura | Pienamente utilizzabile (I/O, PWM, UART, 1-Wire) |
 | **GPIO 18** | **Encoder CLK** | IN | Encoder pin A (Clock) | Pull-up interno 45 kΩ abilitato in ESPHome |
 | **GPIO 19** | **Encoder DT** | IN | Encoder pin B (Data) | Pull-up interno 45 kΩ abilitato in ESPHome |
-| **GPIO 20** | Libero | - | Disponibile per espansione | Esempio: sensore aggiuntivo |
+| **GPIO 20** | - | - | Non esposto sul DevKitC V4 | Non presente sul connettore del modulo |
 | **GPIO 21** | **Encoder SW** | IN | Pulsante encoder (pressione) | Pull-up interno 45 kΩ abilitato in ESPHome |
 | **GPIO 22** | **Pulsante multifunzione** | IN | Pulsante NO verso GND | Pull-up interno 45 kΩ, logica breve/lunga in ESPHome |
-| **GPIO 23** | Libero | - | Disponibile (compressore rimosso) | Esempio: secondo PWM o sensore |
+| **GPIO 23** | **Pulsante luci LED** | IN | Pulsante NO verso GND | Pull-up interno 45 kΩ, toggle striscia LED |
 | **GPIO 25** | **PWM Ventola** | OUT | → Gate MOSFET Q1 (ventola 12 V) | PWM a 25 kHz (oppure 1 kHz se rumorosa) |
 | **GPIO 26** | **ON/OFF Umidificatore** | OUT | → Gate MOSFET Q3 (umidificatore 24 V) | PWM opzionale o digitale |
-| **GPIO 27** | **UART2 RX** | IN | ← TX MH-Z19C (pin 2) **DEPRECATED** | Non usato con SCD41 (I²C) |
+| **GPIO 27** | **UART2 RX (Display)** | IN | ← TX Nextion/TJC | 115200 baud; eventi touch dal display |
 | **GPIO 32** | **SSR Riscaldatore (PID)** | OUT | → R 10kΩ → Base BC547 → SSR- | PWM o digitale, output PID |
 | **GPIO 33** | **PWM LED strip** | OUT | → Gate MOSFET Q2 (LED 12 V) | PWM 20-25 kHz per dimmer, oppure digitale |
 | **GPIO 34** | **Ventola TACH** | IN | Giallo ventola 4-pin | Input-only GPIO, pulse_counter in ESPHome |
-| **GPIO 35** | ❌ **INPUT ONLY - NON USARE** | - | ⚠️ **Non ha uscita** | Rimosso dalla BOM (era LED di stato) |
-| **GPIO 36** | **SENSOR_VP** | IN | Input-only | Disponibile solo lettura (es. ADC futuro) |
+| **GPIO 35** | Libero (solo ingresso) | IN | Input-only, ADC1 | Utilizzabile come ingresso (no pull-up interno) |
+| **GPIO 36** | **SENSOR_VP** | IN | Input-only, ADC1 | Libero: solo lettura (no pull-up interno) |
 | **GPIO 37** | - | - | Non disponibile | Fisicamente non collegato |
 | **GPIO 38** | - | - | Non disponibile | Fisicamente non collegato |
-| **GPIO 39** | **SENSOR_VN** | IN | Input-only | Disponibile solo lettura (es. ADC futuro) |
+| **GPIO 39** | **SENSOR_VN** | IN | Input-only, ADC1 | Libero: solo lettura (no pull-up interno) |
 
 ---
 
 ## 📊 Riepilogo Utilizzo GPIO
 
-### In Uso (18 GPIO)
+### In Uso (16 GPIO + debug UART0)
 - **I²C:** GPIO 4 (SDA), GPIO 5 (SCL)
 - **1-Wire:** GPIO 13 (DATA)
+- **UART2 Display Nextion/TJC:** GPIO 14 (TX), GPIO 27 (RX)
 - **PWM Uscite:** GPIO 25 (Ventola), GPIO 26 (Umidificatore), GPIO 32 (SSR), GPIO 33 (LED)
 - **Digitali Uscite:** GPIO 16 (LED stato)
-- **Digitali Ingressi:** GPIO 18 (Encoder CLK), GPIO 19 (Encoder DT), GPIO 21 (Encoder SW), GPIO 22 (Pulsante MF), GPIO 34 (Ventola TACH)
-- **UART (debug):** GPIO 1 (TX), GPIO 3 (RX) — utilizzati dal DevKit per la console
+- **Digitali Ingressi:** GPIO 18 (Encoder CLK), GPIO 19 (Encoder DT), GPIO 21 (Encoder SW), GPIO 22 (Pulsante MF), GPIO 23 (Pulsante luci LED), GPIO 34 (Ventola TACH)
+- **UART0 (debug):** GPIO 1 (TX), GPIO 3 (RX) — console via USB del DevKit
 
-### Liberi/Riservati (20 GPIO)
-- **Riservati boot:** GPIO 0, 2, 12, 15 (non toccare)
-- **Riservati PSRAM/Flash:** GPIO 6-11 (modulo WROOM-32E)
-- **Liberi per espansione:** GPIO 17, 20, 23, 36, 39
+### Liberi per espansione
+
+| GPIO | Tipo | Note |
+|---|---|---|
+| **17** | I/O completo | Il più versatile: uscita, PWM, UART, 1-Wire, secondo bus |
+| **35** | Solo ingresso | ADC1, senza pull-up interno |
+| **36** (VP) | Solo ingresso | ADC1, senza pull-up interno |
+| **39** (VN) | Solo ingresso | ADC1, senza pull-up interno |
+
+Condizionali: GPIO 2, 12, 15 (strapping) solo con cautela; GPIO 1/3 se si rinuncia al debug UART.
+
+### Riservati / non disponibili
+- **Boot:** GPIO 0, 2, 12, 15 (non toccare)
+- **Flash SPI:** GPIO 6-11 (modulo WROOM-32E)
+- **Non esposti sul DevKitC V4:** GPIO 20, 24, 28-31, 37, 38
 
 ---
 
@@ -207,12 +219,23 @@ gpio:
   - pin: 22
     id: btn_mf
     mode: INPUT
+
+  # GPIO 23: Pulsante luci LED
+  - pin: 23
+    id: btn_luci
+    mode: INPUT
     
   # GPIO 34: Ventola TACH (pulse counter)
   - pin: 34
     id: fan_tach
     mode: INPUT
     
+# GPIO 14/27: UART2 verso display Nextion (vedi 20-DISPLAY-NEXTION.md)
+uart:
+  tx_pin: 14
+  rx_pin: 27
+  baud_rate: 115200
+
 i2c:
   sda: 4
   scl: 5
@@ -228,13 +251,15 @@ dallas:
 ## ✅ Checklist di Validazione
 
 - [ ] GPIO 0, 2, 12, 15: non usati per controllo (riservati boot)
-- [ ] GPIO 35: non usato (input-only, LED spostato a GPIO 16)
+- [ ] GPIO 35, 36, 39: input-only, liberi (nessuna uscita)
+- [ ] GPIO 14, 27: UART2 verso display Nextion/TJC (TX con R 1kΩ)
+- [ ] GPIO 23: pulsante luci LED con pull-up interno
 - [ ] GPIO 4, 5: bus I²C principale con pull-up 4.7kΩ
 - [ ] GPIO 13: bus 1-Wire con pull-up 4.7kΩ
 - [ ] GPIO 25, 26, 32, 33: PWM/digitali per carichi DC
 - [ ] GPIO 16: uscita per LED di stato (40 mA max)
 - [ ] GPIO 34: ingresso tach ventola (input-only, ok)
-- [ ] GPIO 18, 19, 21, 22: ingressi con pull-up interni abilitati
+- [ ] GPIO 18, 19, 21, 22, 23: ingressi con pull-up interni abilitati
 - [ ] Nessun conflitto tra funzioni GPIO
 - [ ] Tutte le resistenze pull-up dimensionate (4.7kΩ standard per I²C, 10kΩ per gate MOSFET)
 - [ ] Tutti gli ESD/fly-back diodi in posizione

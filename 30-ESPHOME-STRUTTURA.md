@@ -49,6 +49,39 @@ web_server:
     username: admin
     password: !secret web_password
 
+# ===== UART + DISPLAY NEXTION/TJC 5" (touch) =====
+# Dettagli e mappa componenti: 20-DISPLAY-NEXTION.md
+uart:
+  id: uart_nextion
+  tx_pin: GPIO14
+  rx_pin: GPIO27
+  baud_rate: 115200
+
+globals:
+  - id: ui_cursor   # campo evidenziato dall'encoder (0-3)
+    type: int
+    initial_value: "0"
+  - id: ui_edit     # true = l'encoder modifica il valore
+    type: bool
+    initial_value: "false"
+
+display:
+  - platform: nextion
+    id: nextion_disp
+    uart_id: uart_nextion
+    update_interval: 1s
+    start_up_page: 0
+    lambda: |-
+      it.set_component_text_printf("t_temp", "%.1f", id(sht45_temp).state);
+      it.set_component_text_printf("t_rh",   "%.0f", id(sht45_rh).state);
+      it.set_component_text_printf("t_co2",  "%.0f", id(scd41_co2).state);
+      it.set_component_text_printf("t_set",  "%.1f", id(climate_heat).target_temperature);
+      for (int i = 0; i < 4; i++) {
+        it.set_component_background_color(
+          ("b_sel" + std::to_string(i)).c_str(),
+          (i == id(ui_cursor)) ? (id(ui_edit) ? "RED" : "YELLOW") : "BLACK");
+      }
+
 # ===== I2C BUS =====
 i2c:
   sda: GPIO4
@@ -147,6 +180,20 @@ sensor:
     filters:
       - multiply: 6  # Converti impulsi_5s a RPM (2 impulsi/giro)
 
+  # Encoder rotativo: cursore/valore UI. Versione completa (modifica valori)
+  # in 21-ENCODER-PULSANTI.md: sostituire questo blocco con quello.
+  - platform: rotary_encoder
+    id: ui_encoder
+    pin_a: GPIO18
+    pin_b: GPIO19
+    resolution: 2
+    on_clockwise:
+      - lambda: |-
+          if (!id(ui_edit)) { id(ui_cursor) = (id(ui_cursor) + 1) % 4; }
+    on_anticlockwise:
+      - lambda: |-
+          if (!id(ui_edit)) { id(ui_cursor) = (id(ui_cursor) + 3) % 4; }
+
 # ===== OUTPUT PWM/DIGITALI =====
 output:
   # GPIO 32: SSR Riscaldatore (PID output)
@@ -227,33 +274,51 @@ light:
     id: led_strip
     restore_mode: RESTORE_DEFAULT_OFF
 
-# ===== BINARY SENSORS (PULSANTI) =====
+# ===== BINARY SENSORS (PULSANTI E TOUCH) =====
 binary_sensor:
-  # Encoder CLK
+  # Eventi touch Nextion (component_id da verificare nell'editor)
+  - platform: nextion
+    page_id: 0
+    component_id: 10          # b_led
+    name: "Touch Luci"
+    on_press:
+      - light.toggle: led_strip
+
+  - platform: nextion
+    page_id: 0
+    component_id: 11          # b_hum
+    name: "Touch Umidificatore"
+    on_press:
+      - switch.toggle: switch_humid
+
+  # Pulsante luci LED dedicato (GPIO 23)
   - platform: gpio
-    pin: GPIO18
-    name: "Encoder CLK"
-    id: enc_clk
-    internal: true
-  
-  # Encoder DT
+    pin:
+      number: GPIO23
+      mode: INPUT_PULLUP
+      inverted: true
+    name: "Pulsante Luci LED"
+    id: btn_luci
+    filters:
+      - delayed_on: 10ms
+      - delayed_off: 10ms
+    on_press:
+      - light.toggle: led_strip
+
+  # Encoder Switch: entra/esce dalla modifica del campo
   - platform: gpio
-    pin: GPIO19
-    name: "Encoder DT"
-    id: enc_dt
-    internal: true
-  
-  # Encoder Switch
-  - platform: gpio
-    pin: GPIO21
+    pin:
+      number: GPIO21
+      mode: INPUT_PULLUP
+      inverted: true
     name: "Pulsante Encoder"
     id: btn_encoder
     filters:
       - delayed_on: 10ms
       - delayed_off: 10ms
     on_press:
-      lambda: |-
-        ESP_LOGD("UI", "Encoder button pressed");
+      - lambda: |-
+          id(ui_edit) = !id(ui_edit);
   
   # Pulsante Multifunzione
   - platform: gpio
@@ -265,21 +330,15 @@ binary_sensor:
       - delayed_on: 10ms
       - delayed_off: 10ms
     
-    # Pressione breve: Toggle LED
+    # Pressione breve: annulla modifica e torna alla Home
     on_click:
       min_length: 50ms
       max_length: 1000ms
       then:
-        - logger.log:
-            level: INFO
-            message: "LED Toggle (short press)"
-        - if:
-            condition:
-              lambda: return id(led_pwm).state > 0.01;
-            then:
-              - output.turn_off: led_pwm
-            else:
-              - output.turn_on: led_pwm
+        - lambda: |-
+            id(ui_edit) = false;
+            id(ui_cursor) = 0;
+            id(nextion_disp).goto_page("home");
     
     # Pressione lunga: Toggle Umidificatore
     on_multi_click:

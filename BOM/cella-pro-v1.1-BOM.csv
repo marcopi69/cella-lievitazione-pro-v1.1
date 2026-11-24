@@ -12,9 +12,11 @@ Quantity,Designator,Part Number,Value,Footprint,Description,Supplier,Unit Cost E
 1,K1,SSR-25DA,,DIP-4 Package,Solid State Relay AC 220V 25A,Various,8.50,8.50
 1,SW1,ROTARY ENCODER,360 degrees,5-Pin,Encoder meccanico 20 pos/rev,AliExpress,2.00,2.00
 1,SW2,PUSHBUTTON-6x6,,6x6x5mm,Pulsante multifunzione NO,AliExpress,0.30,0.30
+1,SW4,PUSHBUTTON-6x6,,6x6x5mm,Pulsante luci LED NO (GPIO 23),AliExpress,0.30,0.30
+1,R_TXD,Resistore,1k,0805,Serie TX UART display Nextion,AliExpress,0.05,0.05
 1,SW3,PUSHBUTTON-6x6,,6x6x5mm,Pulsante reset NO,AliExpress,0.30,0.30
 1,LED1,LED-3MM,RED,3mm-THT,LED 3mm rosso stato,AliExpress,0.10,0.10
-1,U7,ILI9341 Display,,SPI Module,Display touch 3.5 inch 320x480,AliExpress,15.00,15.00
+1,U7,Display Nextion/TJC 5in UART,,UART 3.3V,Display 5 inch 800x480 con touch,AliExpress/ITEAD,45.00,45.00
 1,FAN1,Ventola DC 12V,60mm 4-PIN,2.54 JST,Ventola ricircolo PWM 25kHz,Noctua/AliExpress,20.00,20.00
 1,HUMID1,Modulo Umidificatore,,2-PIN,Umidificatore ultrasuoni 24V,AliExpress,12.00,12.00
 1,LED_STRIP,Striscia LED RGB,,2-PIN/DIN,WS2812B RGB/RGBW 12V 60 LED,AliExpress,8.00,8.00
@@ -44,7 +46,7 @@ Quantity,Designator,Part Number,Value,Footprint,Description,Supplier,Unit Cost E
 1,CABLE_1W,Cavo Schermato,22AWG 5m,,Cavo 1-Wire DS18B20 schermato,AliExpress,2.00,2.00
 1,J_DS1,Connettore JST 3-pin,,2.54mm Pitch,Connettore DS18B20 sonda 1,AliExpress,0.30,0.30
 1,J_DS2,Connettore JST 3-pin,,2.54mm Pitch,Connettore DS18B20 sonda 2,AliExpress,0.30,0.30
-1,J_OLED,Connettore JST 4-pin,,2.54mm Pitch,Connettore display touch SPI,AliExpress,0.30,0.30
+1,J_DISP,Connettore JST 4-pin,,2.54mm Pitch,Connettore display Nextion (+5V GND TX RX),AliExpress,0.30,0.30
 1,J_ENC,Connettore JST 5-pin,,2.54mm Pitch,Connettore encoder 5-pin,AliExpress,0.40,0.40
 1,J_PSU,Connettore KF350 5-pin,,5.08mm Pitch,Connettore PSU ingresso,AliExpress,0.40,0.40
 1,J_VENTOLA,Connettore Molex 2-pin,,5.08mm Pitch,Connettore ventola +12V,AliExpress,0.50,0.50
@@ -61,14 +63,14 @@ Quantity,Designator,Part Number,Value,Footprint,Description,Supplier,Unit Cost E
 1,,Kit Cavi Jumper,,22 AWG 10 colori 100m,Cavi per interconnessioni PCB,AliExpress,5.00,5.00
 1,,Connettori DuPont,,20-pin Kit,Connettori dupont (opzionale prototipo breadboard),AliExpress,1.00,1.00
 
-TOTAL ESTIMATED COST: 220.00 EUR
+TOTAL ESTIMATED COST: 250.00 EUR
 
 NOTE:
 - Prezzi sono stime AliExpress/Mouser medio 2026
 - Lead time: SCD41 può essere raro, ordinare con anticipo (2-4 settimane)
 - PSU ATX: può essere ricondizionato da vecchio PC (~5-8€)
 - Ventola Noctua (20€): silenziosa; alternative economiche: Be Quiet (12€) o generiche (5€)
-- Display touch: verificare compatibilità driver ST7789 o ILI9341 con ESPHome
+- Display Nextion/TJC 5": verificare livello TX (3.3 V o 5 V) prima del collegamento a GPIO 27
 - Tutti i componenti sono THT o connettori standard per facilità montaggio prototipo
 ```
 

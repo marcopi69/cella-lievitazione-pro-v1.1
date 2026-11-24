@@ -53,8 +53,8 @@ La cella di lievitazione PRO è un sistema completamente autonomo per il control
 
 | Componente | Qt. | Specifica | Funzione | Note |
 |-----------|-----|---------|---------|-------|
-| **Display touch capacitivo** | 1 | 3.5" ILI9341 (SPI) oppure ESP32-S3 integrato | Interfaccia principale | Opzione 1: ESP32 + ILI9341 / Opzione 2: ESP32-S3 All-in-One |
-| **Resistori pull-up touch** | - | 100 kΩ (se SPI) | Stabilizzazione linee dati | - |
+| **Display Nextion/TJC 5" con touch** | 1 | 800×480, UART 3.3 V TTL, touch resistivo o capacitivo | Interfaccia principale (GUI interna, touch + encoder) | 2 GPIO (14 TX, 27 RX); vedi 20-DISPLAY-NEXTION.md |
+| **Resistore serie TX** | 1 | 1 kΩ 1/4 W | Protezione linea TX → RX display | - |
 
 ### 2.5 Encoder e Pulsanti
 
@@ -62,7 +62,8 @@ La cella di lievitazione PRO è un sistema completamente autonomo per il control
 |-----------|-----|---------|---------|-------|
 | **Encoder rotativo 360°** | 1 | 20 posizioni/giro, 5 pin | Menu navigazione, cambio setpoint | GPIO 18, 19, 21 |
 | **Pulsante reset** | 1 | Normalmente aperto NO | Reset hardware ESP32 | Collegato EN, con condensatore 100 nF |
-| **Pulsante multifunzione** | 1 | Normalmente aperto NO | LED ON/OFF (breve), Umidif. ON/OFF (lungo) | GPIO 22 |
+| **Pulsante multifunzione** | 1 | Normalmente aperto NO | Indietro/Home (breve), Umidif. ON/OFF (lungo) | GPIO 22 |
+| **Pulsante luci LED** | 1 | Normalmente aperto NO | Toggle striscia LED | GPIO 23 |
 
 ### 2.6 Driver MOSFET — Carichi DC 12 V e 24 V
 
@@ -138,7 +139,7 @@ La cella di lievitazione PRO è un sistema completamente autonomo per il control
 |-----------|-----|---------|---------|-------|
 | **LED di stato** | 1 | LED 3 mm rosso oppure bicolore | Indicazione stato sistema | GPIO 16 |
 | **R_LED** | 1 | 1 kΩ 1/4 W | Resistenza serie LED | I_led ≈ 1.3 mA @ 3.3 V |
-| **Connettore J_OLED** | 1 | JST 4-pin oppure DuPont | Interfaccia display touch (SPI/I²C) | Adatto al tipo di display scelto |
+| **Connettore J_DISP** | 1 | JST 4-pin oppure DuPont | Display Nextion/TJC (+5V, GND, TX, RX) | UART2, GPIO 14/27 |
 | **Connettori J_DS18B20** | 2 | JST 3-pin | Interfaccia sonde temperatura | Cavo schermato ≤ 5 m |
 | **Connettore J_MH-SCD41** | 1 | JST 4-pin | Interfaccia sensore CO₂ (I²C) | Cavo non schermato, ≤ 1 m |
 | **Connettore J_Encoder** | 1 | JST 5-pin o DuPont | Interfaccia encoder rotativo | GND, +3.3V, CLK, DT, SW |
@@ -158,10 +159,10 @@ La cella di lievitazione PRO è un sistema completamente autonomo per il control
 | ESP32 (Wi-Fi attivo) | 240 mA | 500 mA | 1.2 W | Conteggiare sempre il picco |
 | SHT45 | 1 mA | 5 mA | 5 mW | I²C pull-up |
 | SCD41 | 5 mA | 10 mA | 25 mW | I²C pull-up, lettura |
-| Display touch (SPI) | 100 mA | 150 mA | 0.5 W | Refresh display |
+| Display Nextion 5" (UART) | 250 mA | 600 mA | 3 W | Dipende da luminosità |
 | LED di stato | 2 mA | 2 mA | 7 mW | Sempre acceso |
 | Encoder + pulsanti | 1 mA | 1 mA | 3 mW | Pull-up interni |
-| **TOTALE +5 V** | **~350 mA** | **~680 mA** | **~3.4 W** | **Fusibile F2: 2 A ✅** |
+| **TOTALE +5 V** | **~500 mA** | **~1.2 A** | **~6 W** | **Fusibile F2: 2 A ✅ (margine 1.6× sul picco)** |
 
 ⚠️ **Nota:** La linea +5 V è da PSU ATX. Il regolatore interno ESP32 (VIN → 3.3V) consuma i 240 mA per Wi-Fi. Capacitor +5V da 100 µF maniene stabile la tensione.
 
@@ -230,15 +231,15 @@ La cella di lievitazione PRO è un sistema completamente autonomo per il control
         │  ├─ PCA9548A (0x70)                  │
         │  │  ├─ Ch 3: SHT45 (0x44)             │
         │  │  └─ Ch 4: SCD41 (0x44)             │
-        │  ├─ Display touch (SPI oppure I²C)    │
+        │  ├─ (display su UART2: GPIO 14/27)     │
         │                                        │
         │  1-Wire BUS (GPIO 13)                 │
         │  ├─ DS18B20 #1 (sonda zona)           │
         │  └─ DS18B20 #2 (backup)               │
         │                                        │
         │  GPIO 25: Ventola PWM + tach (GPIO34) │
-        │  GPIO 18/19/21: Encoder + pulsanti    │
-        │  GPIO 22: Pulsante multifunzione      │
+        │  GPIO 18/19/21: Encoder + pulsanti; 22: MF; 23: luci │
+        │  GPIO 22: Pulsante multifunzione; 23: Pulsante luci │
         │                                        │
         │  Alimentazione: PSU ATX 260 W         │
         │  (+5V, +12V, +24V)                    │

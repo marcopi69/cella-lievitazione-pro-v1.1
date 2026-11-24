@@ -1,6 +1,15 @@
 # ENCODER E PULSANTI v1.1
 
-## 1. Encoder Rotativo 360° (Menu Navigation)
+## 1. Encoder Rotativo 360° (Navigazione UI sul display Nextion)
+
+Il display Nextion è touch; l'encoder lo affianca come comando "elastico": il comportamento dipende dalla posizione del cursore sul display (vedi 20-DISPLAY-NEXTION.md §4).
+
+| Stato UI | Rotazione | Click encoder |
+|---|---|---|
+| Navigazione (`ui_edit=false`) | Sposta il cursore tra i campi | Entra in modifica del campo |
+| Modifica (`ui_edit=true`) | Cambia il valore del campo | Conferma ed esce |
+
+Campi selezionabili (`ui_cursor`): 0 = setpoint T, 1 = ventola %, 2 = luci %, 3 = setpoint RH.
 
 ### Specifiche
 
@@ -38,36 +47,74 @@ Schema:
                     └─ Encoder Switch
 ```
 
-### Configurazione ESPHome
-
 ```yaml
-rotary_encoder:
+globals:
+  - id: ui_cursor
+    type: int
+    initial_value: "0"
+  - id: ui_edit
+    type: bool
+    initial_value: "false"
+
+sensor:
   - platform: rotary_encoder
+    id: setpoint_encoder
     pin_a: GPIO18
     pin_b: GPIO19
-    pin_reset: GPIO21  # Pulsante encoder
-    resolution: 1      # 1 impulso per click
-    min_value: 0
-    max_value: 100
-    id: setpoint_encoder
+    resolution: 2
     on_clockwise:
-      lambda: |-
-        auto current = id(climate_heat).target_temperature;
-        id(climate_heat).set_target_temperature(min(current + 0.5, 40.0));
+      - lambda: |-
+          if (!id(ui_edit)) { id(ui_cursor) = (id(ui_cursor) + 1) % 4; }
+          else {
+            switch (id(ui_cursor)) {
+              case 0: {  // setpoint T
+                auto call = id(climate_heat).make_call();
+                call.set_target_temperature(std::min(id(climate_heat).target_temperature + 0.5f, 40.0f));
+                call.perform(); break; }
+              case 1: {  // ventola
+                auto call = id(ventola_ricircolo).make_call();
+                call.set_speed(std::min(id(ventola_ricircolo).speed + 5, 100));
+                call.perform(); break; }
+              case 2: {  // luci
+                auto call = id(led_strip).make_call();
+                call.set_brightness(std::min(id(led_strip).current_values.get_brightness() + 0.05f, 1.0f));
+                call.perform(); break; }
+            }
+          }
     on_anticlockwise:
-      lambda: |-
-        auto current = id(climate_heat).target_temperature;
-        id(climate_heat).set_target_temperature(max(current - 0.5, 15.0));
+      - lambda: |-
+          if (!id(ui_edit)) { id(ui_cursor) = (id(ui_cursor) + 3) % 4; }
+          else {
+            switch (id(ui_cursor)) {
+              case 0: {
+                auto call = id(climate_heat).make_call();
+                call.set_target_temperature(std::max(id(climate_heat).target_temperature - 0.5f, 15.0f));
+                call.perform(); break; }
+              case 1: {
+                auto call = id(ventola_ricircolo).make_call();
+                call.set_speed(std::max(id(ventola_ricircolo).speed - 5, 25));
+                call.perform(); break; }
+              case 2: {
+                auto call = id(led_strip).make_call();
+                call.set_brightness(std::max(id(led_strip).current_values.get_brightness() - 0.05f, 0.0f));
+                call.perform(); break; }
+            }
+          }
 
 binary_sensor:
   - platform: gpio
-    pin: GPIO21
+    pin:
+      number: GPIO21
+      mode: INPUT_PULLUP
+      inverted: true
     name: "Pulsante Encoder"
     id: btn_encoder
+    filters:
+      - delayed_on: 10ms
+      - delayed_off: 10ms
     on_press:
-      lambda: |-
-        // Pressione encoder: attiva menu o toggle modalità
-        ESP_LOGD("UI", "Encoder button pressed");
+      - lambda: |-
+          id(ui_edit) = !id(ui_edit);
 ```
 
 ---
@@ -77,10 +124,11 @@ binary_sensor:
 ### Logica Pressione
 
 ```
-Pressione breve (< 1 s):  Toggle striscia LED
+Pressione breve (< 1 s):  Annulla modifica / torna alla Home del display
 Pressione lunga (> 2 s):  Toggle umidificatore
-Pressione molto lunga:    Entrata menu setup
 ```
+
+> La funzione "toggle luci" è passata al pulsante dedicato su GPIO 23 (§2b).
 
 ### Circuito
 
@@ -106,20 +154,14 @@ binary_sensor:
       - delayed_off: 10ms
     
     on_click:
-      # Pressione breve (< 1 s)
+      # Pressione breve (< 1 s): annulla modifica e vai alla Home
       min_length: 50ms
       max_length: 1000ms
       then:
-        - logger.log:
-            level: INFO
-            message: "LED Toggle"
-        - if:
-            condition:
-              lambda: return id(led_pwm).state > 0.01;
-            then:
-              - output.turn_off: led_pwm
-            else:
-              - output.turn_on: led_pwm
+        - lambda: |-
+            id(ui_edit) = false;
+            id(ui_cursor) = 0;
+            id(nextion_disp).goto_page("home");
     
     on_multi_click:
       # Pressione lunga (> 2 s)
@@ -137,6 +179,36 @@ binary_sensor:
                   - output.turn_off: humid_pwm
                 else:
                   - output.turn_on: humid_pwm
+```
+
+---
+
+## 2b. Pulsante Luci LED (GPIO 23)
+
+Pulsante dedicato: un tocco accende/spegne la striscia LED, anche senza guardare il display.
+
+```
+GPIO 23 ──────┬─── 10nF (decoupling) ──── GND
+              │
+              └─ Pulsante NO verso GND
+
+Pull-up interno: 45kΩ (ESP32)
+```
+
+```yaml
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO23
+      mode: INPUT_PULLUP
+      inverted: true
+    name: "Pulsante Luci LED"
+    id: btn_luci
+    filters:
+      - delayed_on: 10ms
+      - delayed_off: 10ms
+    on_press:
+      - light.toggle: led_strip
 ```
 
 ---
@@ -247,6 +319,9 @@ automation:
 | 19 | Encoder DT | IN | 0/3.3V | Interno 45kΩ |
 | 21 | Encoder SW | IN | 0/3.3V | Interno 45kΩ |
 | 22 | Pulsante MF | IN | 0/3.3V | Interno 45kΩ |
+| 23 | Pulsante luci LED | IN | 0/3.3V | Interno 45kΩ |
+| 14 | UART2 TX (Display) | OUT | UART 3.3V | - |
+| 27 | UART2 RX (Display) | IN | UART 3.3V | - |
 | 34 | Ventola TACH | IN | 0/3.3V | No (input-only) |
 | 16 | LED di stato | OUT | 0-3.3V PWM | - |
 | EN | Reset HW | IN | 0/3.3V | Interno 10-15kΩ |

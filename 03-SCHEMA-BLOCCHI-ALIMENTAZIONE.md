@@ -56,8 +56,8 @@
   │  └─────────────┘  └──────────────┘
   │
   │  ┌──────────────────────┐
-  │  │ Display Touch 3.5"    │
-  │  │ (SPI oppure I²C)      │
+  │  │ Display Nextion 5"    │
+  │  │ (UART2 + touch)       │
   │  └──────────────────────┘
   └────────────────────────────┘
 
@@ -93,16 +93,16 @@ PSU ATX +5V OUT ────┬──── Fusibile F2 (2A SB) ────┬�
 | PCA9548A VCC | 5 mA | Sopra-corrente F2 | Alimentato da +3.3V ESP32 |
 | SHT45 VCC | 2 mA | Sopra-corrente F2 | Alimentato da +3.3V ESP32 |
 | SCD41 VCC | 5 mA | Sopra-corrente F2 | Alimentato da +3.3V ESP32 |
-| Display touch VCC | 100 mA | Sopra-corrente F2 | Picco durante refresh |
+| Display Nextion 5" VCC | 250 mA (picco 600 mA) | Sopra-corrente F2 | Dipende dalla luminosità |
 | LED di stato | 2 mA | Sopra-corrente F2 | Tramite resistenza 1kΩ |
 | SSR+ (controllo) | < 1 mA | BC547 driver | Non attraversa fusibile diretto |
-| **TOTALE** | **~350 mA** | **Fusibile 2A** | **✅ Margin 5.7x** |
+| **TOTALE** | **~500 mA (picco ~1.2 A)** | **Fusibile 2A** | **✅ Margin 1.6x sul picco** |
 
 ### Protezioni +5V
 
 - **F2 Fusibile 2A SB (Slow Blow):** Interviene se corrente > 2A per più di 5-10 secondi
 - **Condensatori:** C1 (100µF bulk) + C2 (100nF ceramic) per stabilità e rumore
-- **Decoupling:** 100nF ceramico vicino a ogni IC alimentato a 5V (PCA9548A, SCD41, display)
+- **Decoupling:** 100nF ceramico vicino a ogni IC alimentato a 5V (PCA9548A, SCD41, display Nextion)
 
 ---
 

@@ -9,15 +9,15 @@ Il bus I²C dell'ESP32 (GPIO 4 SDA, GPIO 5 SCL) è muxato tramite **PCA9548A** p
 ```
 Senza PCA9548A (PROBLEMA):
   SHT45 indirizzo 0x44 ─────┐
-  SCD41 indirizzo 0x44 ─────┼─── Bus I2C unico
-  OLED indirizzo 0x3C ──────┘
+  SCD41 indirizzo 0x44 ─────┴─── Bus I2C unico
   
   ⚠ Due dispositivi (SHT45 + SCD41) stesso indirizzo = CONFLITTO! ❌
 
 Con PCA9548A (SOLUZIONE):
   SHT45 (0x44) ──────── Canale 3 ─┐
-  SCD41 (0x44) ──────── Canale 4 ─┼── PCA9548A (0x70) ──── Bus I2C ESP32
-  OLED (0x3C) ────────── Display ─┘
+  SCD41 (0x44) ──────── Canale 4 ─┴── PCA9548A (0x70) ──── Bus I2C ESP32
+  
+  (Il display Nextion NON è su I²C: usa UART2, GPIO 14/27)
   
   ✅ Ogni dispositivo su canale separato, stesso indirizzo OK!
 ```
@@ -77,7 +77,7 @@ Canale 0 (libero):       Canale 3 (SHT45):         Canale 4 (SCD41):
      │            │            │                                        │
      │            │            │                                        │
 
-Canali 1, 2: OLED displays (se usati)
+Canali 1, 2: liberi per sensori I²C aggiuntivi (il display è su UART, non su I²C)
 Canali 5, 6, 7: Riservati per espansione futura
 ```
 

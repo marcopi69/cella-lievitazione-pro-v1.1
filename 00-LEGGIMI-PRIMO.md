@@ -17,12 +17,12 @@
 - **`10-STADIO-POTENZA.md`** — Alimentatore ATX, fusibili, TVS, bulk capacitor
 - **`11-DRIVER-MOSFET-CARICHI-DC.md`** — IRLZ44N per LED, ventola, umidificatore
 - **`12-DRIVER-SSR-RISCALDATORE.md`** — BC547, SSR-25DA, filo scaldante 220 V
-- **`13-BUS-I2C-SENSORI.md`** — PCA9548A, SHT45, SCD41, display touch
+- **`13-BUS-I2C-SENSORI.md`** — PCA9548A, SHT45, SCD41 (display su UART, non I²C)
 - **`14-SENSORI-TEMPERATURA-CO2.md`** — DS18B20 1-Wire, SCD41 NDIR
 - **`15-VENTOLA-PWM-4PIN.md`** — Ventola 4 pin con controllo PWM + tachimetro
 
 ### **3. Interfaccia Utente**
-- **`20-DISPLAY-TOUCH.md`** — Display touch singolo
+- **`20-DISPLAY-NEXTION.md`** — Display Nextion/TJC 5" UART con touch
 - **`21-ENCODER-PULSANTI.md`** — Encoder 360°, pulsanti, logica input
 
 ### **4. Firmware e Software**
@@ -50,7 +50,7 @@
 | LED stato | GPIO 35 ❌ | GPIO 16 ✅ | GPIO35 è input-only |
 | Ventola | 2 pin + PWM low-side | 4 pin + PWM dedicato | Controllo pulito, tach integrato |
 | Sensore CO₂ | MH-Z19C UART | SCD41 I²C ✅ | Stabilità, compensazione T/RH, I²C nativo |
-| Display | 3× OLED + PCA9548A | 1 touch 3.5" ✅ | Interfaccia moderna, LVGL, user-friendly |
+| Display | 3× OLED + PCA9548A | 1 Nextion/TJC 5" UART + touch ✅ | Interfaccia moderna, GUI sul display (0 RAM ESP32), solo 2 GPIO |
 | GPIO usati | Tutti | Molti liberi | Semplificazione architettura |
 
 ---
@@ -59,14 +59,14 @@
 
 | Parametro | Valore |
 |-----------|--------|
-| **MCU** | ESP32-DevKitC-E32 (WROOM-32E) oppure ESP32-S3 con touch integrato |
+| **MCU** | ESP32-DevKitC V4 (WROOM-32E, 4 MB) |
 | **Controllo T** | PID riscaldamento via SSR + filo scaldante autoregolante 90 W |
 | **Monitoraggio T** | SHT45 (precisione ±0.1°C), DS18B20×2 (backup) |
 | **Controllo RH** | Umidificatore ultrasuoni 24 V (ON/OFF o PWM) |
 | **Monitoraggio CO₂** | SCD41 NDIR 400–5000 ppm, ±40 ppm (I²C, con compensazione T/RH) |
 | **Ricircolo aria** | Ventola 12 V 4-pin PWM + tach, 0–100% speed control |
 | **Illuminazione** | Striscia LED 12 V RGB/RGBW dimmerizzata |
-| **Interfaccia utente** | Display touch capacitivo 3.5" (ESP32-S3 oppure ILI9341+STM32) |
+| **Interfaccia utente** | Display Nextion/TJC 5" UART con touch + encoder rotativo + pulsante MF + pulsante luci LED |
 | **Alimentazione** | PSU ATX 260 W (+5 V, +12 V, +24 V) |
 | **Protezioni** | Fusibili slow-blow, TVS, diodi fly-back, termostato meccanico |
 | **Volume interno** | 60 × 60 × 55 cm (≈ 198 litri) |
@@ -133,7 +133,7 @@ cella-lievitazione-pro-v1.1/
 ├── 13-BUS-I2C-SENSORI.md                  # I2C, PCA9548A, sensori
 ├── 14-SENSORI-TEMPERATURA-CO2.md          # DS18B20, SCD41
 ├── 15-VENTOLA-PWM-4PIN.md                 # Ventola con tach
-├── 20-DISPLAY-TOUCH.md                    # Display touch
+├── 20-DISPLAY-NEXTION.md                  # Display Nextion UART
 ├── 21-ENCODER-PULSANTI.md                 # Input devices
 ├── 30-ESPHOME-STRUTTURA.md                # ESPHome config
 ├── 31-CONTROLLO-PID.md                    # PID logic

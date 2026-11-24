@@ -14,9 +14,10 @@ Quantity,Part Number,Designator,Value,Footprint,Description,Link/Supplier,Unit C
 1,SSR-25DA,K1,SSR-25DA,,Solid State Relay AC 220V 25A,Various/AliExpress,8.50,8.50
 1,Encoder Rotativo 360,SW1,ENCODER-5PIN,,Encoder meccanico 5 pin,AliExpress,2.00,2.00
 1,Pulsante Multifunzione,SW2,PUSHBUTTON-2PIN,,Pulsante NO 6x6mm,AliExpress,0.30,0.30
+1,Pulsante Luci LED,SW4,PUSHBUTTON-2PIN,,Pulsante NO 6x6mm (GPIO 23),AliExpress,0.30,0.30
 1,Pulsante Reset,SW3,PUSHBUTTON-2PIN,,Pulsante NO 6x6mm,AliExpress,0.30,0.30
 1,LED di Stato,LED1,LED-3MM-RED,,LED 3mm rosso,AliExpress,0.10,0.10
-1,Display Touch,U7,ILI9341-SPI,,Display touch 3.5 inch 320x480 SPI,AliExpress,15.00,15.00
+1,Display Nextion/TJC,U7,NEXTION-5-UART,,Display 5 inch 800x480 UART con touch,AliExpress/ITEAD,45.00,45.00
 1,Ventola 4-Pin 12V,FAN1,NOCTUA-60MM-PWM,,Ventola ricircolo 12V 4-pin PWM,Noctua/AliExpress,20.00,20.00
 1,Modulo Umidificatore,HUMID1,ULTRASONIC-24V,,Umidificatore ultrasuoni 24V,AliExpress,12.00,12.00
 1,Striscia LED 12V,LED_STRIP,WS2812B-60LED,,Striscia LED RGB/RGBW 12V 60 LED,AliExpress,8.00,8.00
@@ -43,7 +44,7 @@ Quantity,Part Number,Designator,Value,Footprint,Description,Link/Supplier,Unit C
 1,Cavo Schermato 1-Wire,CABLE_1W,22AWG-SHIELD-5M,,Cavo schermato 1-Wire DS18B20 5m,AliExpress,2.00,2.00
 1,Connettore JST 3-pin,J_DS1,JST-3PIN-2.54,,Connettore sensore DS18B20,AliExpress,0.30,0.30
 1,Connettore JST 3-pin,J_DS2,JST-3PIN-2.54,,Connettore sensore DS18B20,AliExpress,0.30,0.30
-1,Connettore JST 4-pin,J_OLED,JST-4PIN-2.54,,Connettore display touch,AliExpress,0.30,0.30
+1,Connettore JST 4-pin,J_DISP,JST-4PIN-2.54,,Connettore display Nextion (+5V GND TX RX),AliExpress,0.30,0.30
 1,Connettore JST 5-pin,J_ENC,JST-5PIN-2.54,,Connettore encoder,AliExpress,0.40,0.40
 1,Connettore JST 5-pin,J_PSU,JST-5PIN-2.54,,Connettore PSU +5V +12V +24V GND,AliExpress,0.40,0.40
 1,Connettore Molex 2-pin,J_VENTOLA,MOLEX-2PIN-5.08,,Connettore ventola 12V,AliExpress,0.50,0.50
@@ -60,7 +61,7 @@ Quantity,Part Number,Designator,Value,Footprint,Description,Link/Supplier,Unit C
 1,Cablaggio vario,WIRE-KIT,22AWG-10COLORS,,Cavi jumper 22 AWG 10 colori 100m,AliExpress,5.00,5.00
 1,Connettori dupont,DUPONT-KIT,DUPONT-20PIN,,Set connettori dupont (opzionale per prototipo),AliExpress,1.00,1.00
 
-SUMTOTAL (componenti),,,,,,Subtotale,217.72
+SUMTOTAL (componenti),,,,,,Subtotale,248.07
 ,,,,,,,
 Note aggiuntive:,,,,,
 - Costi da AliExpress/Mouser/Digikey cambiano per ordini grandi,
@@ -68,7 +69,7 @@ Note aggiuntive:,,,,,
 - PSU ATX 260W può essere usato vecchio/ricondizionato da rottamazione PC (~5-8€),
 - Filo scaldante può essere ordinato custom da fornitore cinese (~10-15€ per 5m),
 - Ventola Noctua è costosa ma silenziosa; alternative economiche: Be Quiet (~12€) o generiche (~5€),
-- Display touch 3.5": verificare compatibilità con ST7789 o ILI9341 (driver ESPHome),
+- Display Nextion/TJC 5": scegliere modello Basic/Enhanced UART; il touch resistivo o capacitivo non cambia il cablaggio,
 ```
 
 ## Riepilogo Costi
@@ -79,9 +80,9 @@ Note aggiuntive:,,,,,
 | **Relè + Driver** | ~15 | SSR-25DA, BC547, IRLZ44N, diodi |
 | **Carichi** | ~50 | Ventola, LED, umidificatore, filo scaldante |
 | **Alimentazione** | ~30 | PSU ATX, fusibili, protezioni, capacitori |
-| **Interfaccia** | ~25 | Display touch, encoder, pulsanti, LED |
+| **Interfaccia** | ~55 | Display Nextion, encoder, pulsanti, LED |
 | **Connettori + PCB** | ~12 | Morsettiere, connettori, PCB prototipo |
-| **TOTALE** | **~207-220 EUR** | Senza lavoro installazione/cablaggio |
+| **TOTALE** | **~240-250 EUR** | Senza lavoro installazione/cablaggio |
 
 ---
 
