@@ -15,7 +15,7 @@ Quantity,Designator,Part Number,Value,Footprint,Description,Supplier,Unit Cost E
 1,SW4,PUSHBUTTON-6x6,,6x6x5mm,Pulsante luci LED NO (GPIO 23),AliExpress,0.30,0.30
 1,R_TXD,Resistore,1k,0805,Serie TX UART display Nextion,AliExpress,0.05,0.05
 1,SW3,PUSHBUTTON-6x6,,6x6x5mm,Pulsante reset NO,AliExpress,0.30,0.30
-1,LED1,LED-3MM,RED,3mm-THT,LED 3mm rosso stato,AliExpress,0.10,0.10
+1,LED1,WS2812B,5mm,5mm-THT,LED RGB indirizzabile stato,AliExpress,0.20,0.20
 1,U7,Display Nextion/TJC 5in UART,,UART 3.3V,Display 5 inch 800x480 con touch,AliExpress/ITEAD,45.00,45.00
 1,FAN1,Ventola DC 12V,60mm 4-PIN,2.54 JST,Ventola ricircolo PWM 25kHz,Noctua/AliExpress,20.00,20.00
 1,HUMID1,Modulo Umidificatore,,2-PIN,Umidificatore ultrasuoni 24V,AliExpress,12.00,12.00
@@ -38,7 +38,8 @@ Quantity,Designator,Part Number,Value,Footprint,Description,Supplier,Unit Cost E
 7,R_pull,Resistor,10kΩ 1/4W,0207 axial,Resistore pull-up/pull-down x7,AliExpress,0.02,0.14
 4,R_I2C,Resistor,4.7kΩ 1/4W,0207 axial,Resistore pull-up I2C bus x4,AliExpress,0.02,0.08
 2,R_TACH,Resistor,4.7kΩ 1/4W,0207 axial,Resistore partitore tachimetro,AliExpress,0.02,0.04
-1,R_LED,Resistor,1kΩ 1/4W,0207 axial,Resistore LED stato,AliExpress,0.02,0.02
+1,R_LED,Resistor,330Ω 1/4W,0207 axial,Serie dato WS2812 (GPIO16),AliExpress,0.02,0.02
+1,D_LED,1N4148,,DO-35,Diodo serie alimentazione LED (+5V -> ~4.4V),AliExpress,0.03,0.03
 1,R_TACH_H,Resistor,15kΩ 1/4W,0207 axial,Resistore partitore TACH alto,AliExpress,0.02,0.02
 1,R_COL,Resistor,100kΩ 1/4W,0207 axial,Resistore pull-down collettore BC547,AliExpress,0.02,0.02
 1,HEATER,Filo Scaldante,90W 220V,,Filo autoregolante 5m 18W/m,AliExpress,12.00,12.00

@@ -137,7 +137,7 @@ La cella di lievitazione PRO è un sistema completamente autonomo per il control
 
 | Componente | Qt. | Specifica | Funzione | Note |
 |-----------|-----|---------|---------|-------|
-| **LED di stato** | 1 | LED 3 mm rosso oppure bicolore | Indicazione stato sistema | GPIO 16 |
+| **LED di stato** | 1 | LED RGB WS2812 (5 mm o 5050) | Indicazione stato sistema (colori) | GPIO 16 |
 | **R_LED** | 1 | 1 kΩ 1/4 W | Resistenza serie LED | I_led ≈ 1.3 mA @ 3.3 V |
 | **Connettore J_DISP** | 1 | JST 4-pin oppure DuPont | Display Nextion/TJC (+5V, GND, TX, RX) | UART2, GPIO 14/27 |
 | **Connettori J_DS18B20** | 2 | JST 3-pin | Interfaccia sonde temperatura | Cavo schermato ≤ 5 m |
@@ -230,7 +230,7 @@ La cella di lievitazione PRO è un sistema completamente autonomo per il control
         │  I²C BUS (GPIO 4 SDA, GPIO 5 SCL)    │
         │  ├─ PCA9548A (0x70)                  │
         │  │  ├─ Ch 3: SHT45 (0x44)             │
-        │  │  └─ Ch 4: SCD41 (0x44)             │
+        │  │  └─ Ch 4: SCD41 (0x62)             │
         │  ├─ (display su UART2: GPIO 14/27)     │
         │                                        │
         │  1-Wire BUS (GPIO 13)                 │

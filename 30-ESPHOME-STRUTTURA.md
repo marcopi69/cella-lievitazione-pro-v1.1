@@ -101,14 +101,18 @@ tca9548a:
   i2c_id: bus_a
   address: 0x70
   id: pca_multiplexer
+  channels:
+    - bus_id: mux_ch3
+      channel: 3
+    - bus_id: mux_ch4
+      channel: 4
 
 # ===== SENSORI T/RH/CO2 =====
 sensor:
   # SHT45 Canale 3
   - platform: sht4x
-    i2c_id: pca_multiplexer
-    i2c_address: 0x44
-    channel: 3
+    i2c_id: mux_ch3
+    address: 0x44
     update_interval: 10s
     
     temperature:
@@ -129,9 +133,8 @@ sensor:
   
   # SCD41 Canale 4
   - platform: scd4x
-    i2c_id: pca_multiplexer
-    i2c_address: 0x62
-    channel: 4
+    i2c_id: mux_ch4
+    address: 0x62
     update_interval: 10s
     
     co2:
@@ -228,13 +231,7 @@ output:
     max_power: 1.0
     id: humid_pwm
   
-  # GPIO 16: LED di stato
-  - platform: ledc
-    pin: GPIO16
-    frequency: 1000Hz
-    min_power: 0.0
-    max_power: 1.0
-    id: led_status
+
 
 # ===== CLIMATE CONTROLLER (PID RISCALDAMENTO) =====
 climate:
@@ -274,8 +271,20 @@ light:
     id: led_strip
     restore_mode: RESTORE_DEFAULT_OFF
 
+  # GPIO 16: LED RGB di stato (WS2812, 1 filo dati)
+  - platform: esp32_rmt_led_strip
+    id: led_status_light
+    name: "LED Stato"
+    internal: true
+    pin: GPIO16
+    num_leds: 1
+    chipset: WS2812
+    rgb_order: GRB
+    default_transition_length: 0s
+
 # ===== BINARY SENSORS (PULSANTI E TOUCH) =====
-binary_sensor:
+
+# ===== BINARY SENSORS (PULSANTI E TOUCH) ===== (PULSANTI E TOUCH) =====binary_sensor:
   # Eventi touch Nextion (component_id da verificare nell'editor)
   - platform: nextion
     page_id: 0
@@ -394,11 +403,7 @@ switch:
           id: heater_ssr
           level: 0.0
 
-# ===== STATUS LED =====
-status_led:
-  pin:
-    number: GPIO16
-    inverted: false
+# (LED di stato: uscita PWM `led_status` su GPIO16, vedi sezione output)
 
 # ===== AUTOMAZIONI =====
 automation:
@@ -444,21 +449,41 @@ automation:
           id: ventola_ricircolo
           speed: 100
   
-  # Lampeggio LED operativo (1 Hz)
+  # LED RGB di stato (aggiornato ogni 100 ms)
   - trigger:
       platform: time_interval
-      interval: 1s
+      interval: 100ms
     action:
-      - if:
-          condition: api.connected
-          then:
-            - output.set_level:
-                id: led_status
-                level: 0.5
-            - delay: 500ms
-            - output.set_level:
-                id: led_status
-                level: 0.0
+      - lambda: |-
+          uint32_t t = millis();
+          // blink(periodo_ms): vero nella prima meta' del periodo
+          auto blink = [t](uint32_t p) { return (t % p) < (p / 2); };
+          float r = 0, g = 0, b = 0;
+          float T = id(sht45_temp).state, RH = id(sht45_rh).state, C = id(scd41_co2).state;
+          if (std::isnan(T) || std::isnan(RH)) {          // errore sensore: viola
+            if (blink(1000)) { r = 1; b = 1; }
+          } else if (T > 45) {                            // allarme T: rosso veloce
+            if (blink(200)) r = 1;
+          } else if (RH > 95) {                           // allarme UR: arancio veloce
+            if (blink(330)) { r = 1; g = 0.35; }
+          } else if (!std::isnan(C) && C > 4500) {        // allarme CO2: rosso lento
+            if (blink(1500)) r = 1;
+          } else if (!global_api_server->is_connected()) { // offline: blu lentissimo
+            if (blink(4000)) b = 1;
+          } else if (id(climate_heat).action == CLIMATE_ACTION_HEATING) {
+            r = 1; g = 0.35;                              // riscaldamento: arancio fisso
+          } else {                                        // normale: verde lampeggio 1 Hz
+            if (blink(1000)) g = 1;
+          }
+          auto call = id(led_status_light).make_call();
+          if (r + g + b > 0) {
+            call.set_state(true);
+            call.set_rgb(r, g, b);
+            call.set_brightness(0.3f);   // 30 %: non abbaglia di notte
+          } else {
+            call.set_state(false);
+          }
+          call.perform();
 
 # ===== BUTTON (COMANDI MANUALI) =====
 button:

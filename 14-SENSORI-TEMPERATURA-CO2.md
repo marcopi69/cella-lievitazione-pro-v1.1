@@ -16,7 +16,7 @@ Quantity,Part Number,Designator,Value,Footprint,Description,Link/Supplier,Unit C
 1,Pulsante Multifunzione,SW2,PUSHBUTTON-2PIN,,Pulsante NO 6x6mm,AliExpress,0.30,0.30
 1,Pulsante Luci LED,SW4,PUSHBUTTON-2PIN,,Pulsante NO 6x6mm (GPIO 23),AliExpress,0.30,0.30
 1,Pulsante Reset,SW3,PUSHBUTTON-2PIN,,Pulsante NO 6x6mm,AliExpress,0.30,0.30
-1,LED di Stato,LED1,LED-3MM-RED,,LED 3mm rosso,AliExpress,0.10,0.10
+1,LED RGB di Stato,LED1,WS2812B-5MM,,LED RGB indirizzabile 5mm/5050,AliExpress,0.20,0.20
 1,Display Nextion/TJC,U7,NEXTION-5-UART,,Display 5 inch 800x480 UART con touch,AliExpress/ITEAD,45.00,45.00
 1,Ventola 4-Pin 12V,FAN1,NOCTUA-60MM-PWM,,Ventola ricircolo 12V 4-pin PWM,Noctua/AliExpress,20.00,20.00
 1,Modulo Umidificatore,HUMID1,ULTRASONIC-24V,,Umidificatore ultrasuoni 24V,AliExpress,12.00,12.00

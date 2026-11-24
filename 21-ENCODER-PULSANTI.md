@@ -238,76 +238,53 @@ Pull-up interno: ESP32 ha ~10-15kΩ interno verso 3.3V
 
 ---
 
-## 4. LED di Stato (GPIO 16)
+## 4. LED RGB di Stato (GPIO 16)
+
+Un solo LED **WS2812 / WS2812B** (5 mm THT o 5050 SMD, ~0,20 €) collegato con **un unico filo dati** su GPIO 16. Mostra il colore dello stato anche da lontano e funziona come allarme visibile quando il display è spento.
+
+### Collegamento
+
+```
++5 V ──►|── +5V_LED ──┬── WS2812 VDD     (diodo 1N4148 in serie: ~4,4 V)
+                      └── C 100 nF ── GND
+ESP32 GPIO16 ── R 330 Ω ── WS2812 DIN
+GND ─────────────────────── WS2812 VSS
+```
+
+Il WS2812 alimentato a 5 V vorrebbe un dato ≥ 3,5 V, mentre l'ESP32 dà 3,3 V. Il diodo in serie abbassa la sua alimentazione a ~4,4 V (soglia dato ~3,1 V): così il segnale a 3,3 V è sicuro senza level shifter. Assorbimento: ~20 mA a luminosità piena, ~6 mA al 30 % usato qui.
 
 ### Indicazioni Luminose
 
 ```
-Stato Sistema         | Lampeggio LEd
-──────────────────────┼──────────────────────
-Operativo normale     | Lampeggio lento (1 Hz) verde
-Riscaldamento attivo  | Continuo acceso arancio/giallo
-Raffreddamento        | Continuo acceso blu (se compressore)
-Allarme T > 45°C      | Lampeggio veloce (5 Hz) rosso
-Allarme RH > 95%      | Lampeggio veloce (3 Hz) arancio
-Allarme CO₂ > 4500ppm| Lampeggio lento rosso
-Errore sensore        | Lampeggio saltuario + log
-Offline (no Wi-Fi)    | Lampeggio lentissimo (0.5 Hz)
+Stato Sistema          | Colore e comportamento
+───────────────────────┼─────────────────────────────────
+Operativo normale      | Verde, lampeggio 1 Hz
+Riscaldamento attivo   | Arancio fisso
+Allarme T > 45 °C      | Rosso, lampeggio veloce (5 Hz)
+Allarme RH > 95 %      | Arancio, lampeggio veloce (3 Hz)
+Allarme CO₂ > 4500 ppm | Rosso, lampeggio lento (0,7 Hz)
+Errore sensore         | Viola, lampeggio 1 Hz
+Offline (no Home Assistant) | Blu, lampeggio lentissimo (0,25 Hz)
 ```
+
+Priorità (dall'alto): errore sensore → T → RH → CO₂ → offline → riscaldamento → normale. La luminosità è fissata al 30 % per non abbagliare di notte.
 
 ### Configurazione ESPHome
 
 ```yaml
-output:
-  - platform: ledc
-    pin: GPIO16
-    frequency: 1000Hz
-    min_power: 0.0
-    max_power: 1.0
-    id: led_status
-    power_supply: !extend
-      auto_on: true
-
 light:
-  - platform: monochromatic
-    output: led_status
-    name: "LED Stato"
+  - platform: esp32_rmt_led_strip
     id: led_status_light
-
-automation:
-  # Lampeggio normale operativo
-  - trigger: time_interval
-    interval: 1s
-    then:
-      - if:
-          condition: api.connected  # Se connesso a HA
-          then:
-            - light.turn_on:
-                id: led_status_light
-                brightness: 0.5
-      - delay: 500ms
-      - light.turn_off: led_status_light
-  
-  # Allarme T max
-  - trigger:
-      platform: numeric_state
-      entity_id: sensor.sht45_temperature
-      above: 45
-    then:
-      # Lampeggio veloce rosso
-      - repeat:
-          count: 10
-          then:
-            - light.turn_on:
-                id: led_status_light
-                brightness: 1.0
-                red: 1.0
-                green: 0.0
-                blue: 0.0
-            - delay: 100ms
-            - light.turn_off: led_status_light
-            - delay: 100ms
+    name: "LED Stato"
+    internal: true
+    pin: GPIO16
+    num_leds: 1
+    chipset: WS2812
+    rgb_order: GRB
+    default_transition_length: 0s
 ```
+
+La logica dei colori (aggiornata ogni 100 ms con un `lambda`) è in `30-ESPHOME-STRUTTURA.md`, sezione automazioni.
 
 ---
 
@@ -323,7 +300,7 @@ automation:
 | 14 | UART2 TX (Display) | OUT | UART 3.3V | - |
 | 27 | UART2 RX (Display) | IN | UART 3.3V | - |
 | 34 | Ventola TACH | IN | 0/3.3V | No (input-only) |
-| 16 | LED di stato | OUT | 0-3.3V PWM | - |
+| 16 | LED RGB di stato (WS2812) | OUT | 0-3.3V dato 800 kHz | - |
 | EN | Reset HW | IN | 0/3.3V | Interno 10-15kΩ |
 
 ---

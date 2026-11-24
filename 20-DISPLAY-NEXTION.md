@@ -47,10 +47,11 @@ GND ───────────────────────── 
 
 | Pagina | Nome | Contenuto |
 |---|---|---|
-| 0 | `home` | T, RH, CO₂ grandi; setpoint; stato riscaldatore / ventola / umidificatore / luci; icona Wi-Fi |
+| 0 | `home` | T, RH, CO₂ grandi; **grafico T/UR** (`w_graph`); setpoint; icone luce / ventola / riscaldatore / umidificatore / Wi-Fi; barra ventola |
 | 1 | `setpoint` | Setpoint T (15-40 °C), setpoint RH, tasti +/- |
-| 2 | `luci_vent` | Slider luminosità LED, slider ventola, switch umidificatore |
-| 3 | `setup` | Allarmi, offset sensori, IP, versione firmware |
+| 2 | `sensori` | Tabella di tutti i sensori: T/UR di ogni SHT45 (canali PCA9548A), T dei DS18B20, CO₂ SCD41 |
+| 3 | `luci_vent` | Slider luminosità LED, slider ventola, switch umidificatore |
+| 4 | `setup` | Allarmi, offset sensori, IP, versione firmware |
 
 Convenzioni di nomenclatura dei componenti (devono combaciare con il YAML):
 
@@ -60,11 +61,25 @@ Convenzioni di nomenclatura dei componenti (devono combaciare con il YAML):
 | Umidità | `t_rh` | Testo |
 | CO₂ | `t_co2` | Testo |
 | Setpoint | `t_set` | Testo |
+| Grafico T/UR | `w_graph` | Waveform (canale 0 = T, canale 1 = UR) |
+| Barra ventola | `j_fan` | Progress bar (0-100 %) |
+| Testo ventola | `t_fan` | Testo (es. "65 %") |
+| Icona luce | `p_led` | Picture (`pic` = immagine spenta / accesa) |
+| Icone stato | `p_heat`, `p_hum`, `p_wifi` | Picture |
+| Sensori (pagina 2) | `t_s0 … t_s5` | Testo (valore "24.8 °C / 78 %") |
 | Tasto luci | `b_led` | Pulsante (send component id: attivo) |
 | Tasto umidificatore | `b_hum` | Pulsante |
 | Slider ventola | `h_fan` | Slider |
 | Tasti setpoint | `b_up`, `b_dn` | Pulsante |
 | Campo selezionato (cursore) | `b_sel0 … b_sel3` | Pulsante/cornice |
+
+### Grafico T/UR (Waveform)
+
+- Componente *Waveform* da 400×~200 px, due canali: T (rosso) e UR (blu).
+- Il display accetta valori 0-255 per punto: l'ESP32 li scala (T: 15-40 °C → 0-255; UR: 0-100 % → 0-255).
+- Un punto ogni 30 s → 400 punti ≈ **3 h 20 min** di storia a schermo. Con un punto al minuto: ~6 h 40 min.
+- Il grafico si azzera allo spegnimento del display (la storia non è salvata). Per storici lunghi usare Home Assistant / `history`.
+- Etichette degli assi (min/max) come testi fissi accanto al grafico.
 
 ---
 
@@ -109,6 +124,17 @@ display:
       it.set_component_text_printf("t_rh",   "%.0f", id(sht45_rh).state);
       it.set_component_text_printf("t_co2",  "%.0f", id(scd41_co2).state);
       it.set_component_text_printf("t_set",  "%.1f", id(climate_heat).target_temperature);
+      // ventola: barra + testo (fan_speed in %)
+      it.set_component_value("j_fan", (int) id(fan_speed).state);
+      it.set_component_text_printf("t_fan", "%.0f %%", id(fan_speed).state);
+      // icona luce: immagine 1 = accesa, 0 = spenta
+      it.set_component_value("p_led", id(led_strip).current_values.is_on() ? 1 : 0);
+      // pagina sensori
+      it.set_component_text_printf("t_s0", "%.1f C / %.0f %%", id(sht45_temp).state, id(sht45_rh).state);
+      it.set_component_text_printf("t_s1", "%.1f C / %.0f %%", id(sht45_2_temp).state, id(sht45_2_rh).state);
+      it.set_component_text_printf("t_s2", "%.1f C", id(ds18b20_1).state);
+      it.set_component_text_printf("t_s3", "%.1f C", id(ds18b20_2).state);
+      it.set_component_text_printf("t_s4", "%.0f ppm", id(scd41_co2).state);
       // evidenziazione cursore
       for (int i = 0; i < 4; i++) {
         it.set_component_background_color(
@@ -154,6 +180,18 @@ binary_sensor:
           call.set_target_temperature(std::max(t - 0.5f, 15.0f));
           call.perform();
 
+interval:
+  # Un punto ogni 30 s sul grafico (400 punti ≈ 3 h 20 min)
+  - interval: 30s
+    then:
+      - lambda: |-
+          auto scale = [](float v, float lo, float hi) {
+            float n = (v - lo) / (hi - lo) * 255.0f;
+            return (int) std::max(0.0f, std::min(255.0f, n));
+          };
+          id(nextion_disp)->add_waveform_data(1, 0, scale(id(sht45_temp).state, 15, 40));
+          id(nextion_disp)->add_waveform_data(1, 1, scale(id(sht45_rh).state, 0, 100));
+
 globals:
   - id: ui_cursor
     type: int
@@ -162,6 +200,8 @@ globals:
     type: bool
     initial_value: "false"
 ```
+
+Il `1` in `add_waveform_data(1, …)` è il *component id* di `w_graph` nella pagina `home`; gli id sensore (`sht45_2_temp`, `ds18b20_1`, …) vanno allineati ai nomi del file `30-ESPHOME-STRUTTURA.md`. Il grafico va aggiunto solo mentre è visibile la pagina `home` (valutare `if (id(nextion_disp)->get_current_page() == 0)`).
 
 I `component_id` vanno verificati nell'editor Nextion (proprietà *id* del componente) e devono avere *Send Component ID* attivo su *Touch Press Event*.
 
@@ -194,6 +234,9 @@ Linea +5 V rivista: totale ~**1.25 A** di picco contro il fusibile F2 da 2 A SB 
 
 - [ ] Display acceso con +5 V e GND comune
 - [ ] `it.set_component_text` aggiorna T / RH / CO₂
+- [ ] Il grafico T/UR aggiunge un punto ogni 30 s
+- [ ] Barra ventola e icona luce seguono lo stato reale
+- [ ] Pagina sensori mostra tutti i valori
 - [ ] Eventi touch visibili nel log ESPHome
 - [ ] Encoder sposta il cursore, click entra/esce in modifica
 - [ ] Pulsante luci (GPIO 23) accende/spegne la striscia LED

@@ -23,7 +23,7 @@
 | **GPIO 13** | **1-Wire DATA** | I/O | Bus DS18B20 (entrambe le sonde) | Pull-up 4.7 kΩ verso +3.3 V (obbligatorio 1-Wire) |
 | **GPIO 14** | **UART2 TX (Display)** | OUT | → R 1kΩ → RX Nextion/TJC | 115200 baud; breve PWM al boot (ignorato dal display) |
 | **GPIO 15** | ⚠️ Boot strapping | - | Lasciare floating | **NON usare per controllo** |
-| **GPIO 16** | **LED di stato** | OUT | → R 1kΩ → Anodo LED → GND | Output digitale, 3.3V, max 40 mA |
+| **GPIO 16** | **LED RGB di stato (WS2812)** | OUT | → R 330Ω → DIN WS2812 (alimentato +5V con diodo in serie) | Dato 3.3V, 1 filo |
 | **GPIO 17** | Libero | I/O | Disponibile per espansione futura | Pienamente utilizzabile (I/O, PWM, UART, 1-Wire) |
 | **GPIO 18** | **Encoder CLK** | IN | Encoder pin A (Clock) | Pull-up interno 45 kΩ abilitato in ESPHome |
 | **GPIO 19** | **Encoder DT** | IN | Encoder pin B (Data) | Pull-up interno 45 kΩ abilitato in ESPHome |
@@ -175,7 +175,7 @@ esphome:
   board: esp32dev
 
 gpio:
-  # GPIO 16: LED di stato
+  # GPIO 16: LED RGB di stato WS2812 (vedi 21-ENCODER-PULSANTI.md, sez. 4)
   - pin: 16
     id: led_stato
     mode: OUTPUT

@@ -7,19 +7,17 @@ Il bus I²C dell'ESP32 (GPIO 4 SDA, GPIO 5 SCL) è muxato tramite **PCA9548A** p
 ### Vantaggi Multiplexing
 
 ```
-Senza PCA9548A (PROBLEMA):
-  SHT45 indirizzo 0x44 ─────┐
-  SCD41 indirizzo 0x44 ─────┴─── Bus I2C unico
-  
-  ⚠ Due dispositivi (SHT45 + SCD41) stesso indirizzo = CONFLITTO! ❌
+Senza PCA9548A:
+  SHT45 (0x44) e SCD41 (0x62) hanno indirizzi diversi, ma più SHT45
+  (stesso 0x44) sullo stesso bus sarebbero in CONFLITTO.
 
-Con PCA9548A (SOLUZIONE):
+Con PCA9548A:
   SHT45 (0x44) ──────── Canale 3 ─┐
-  SCD41 (0x44) ──────── Canale 4 ─┴── PCA9548A (0x70) ──── Bus I2C ESP32
+  SCD41 (0x62) ──────── Canale 4 ─┴── PCA9548A (0x70) ──── Bus I2C ESP32
   
   (Il display Nextion NON è su I²C: usa UART2, GPIO 14/27)
   
-  ✅ Ogni dispositivo su canale separato, stesso indirizzo OK!
+  ✅ Ogni dispositivo su canale separato: si possono avere più SHT45 identici
 ```
 
 ---
@@ -98,13 +96,17 @@ tca9548a:
   i2c_id: bus_a
   address: 0x70
   id: pca_multiplexer
+  channels:
+    - bus_id: mux_ch3
+      channel: 3
+    - bus_id: mux_ch4
+      channel: 4
 
 # Sensore SHT45 su Canale 3
 sensor:
   - platform: sht4x
-    i2c_id: pca_multiplexer
-    i2c_address: 0x44
-    channel: 3
+    i2c_id: mux_ch3
+    address: 0x44
     update_interval: 10s
     
     temperature:
@@ -119,9 +121,8 @@ sensor:
 
 # Sensore SCD41 su Canale 4
   - platform: scd4x
-    i2c_id: pca_multiplexer
-    i2c_address: 0x62
-    channel: 4
+    i2c_id: mux_ch4
+    address: 0x62
     update_interval: 10s
     
     co2:
