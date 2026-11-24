@@ -92,23 +92,17 @@ Frequenza @ 2000 RPM: f = (2000 rpm / 60 s) × 2 impulsi = ~67 Hz
 Frequenza @ 4000 RPM: f = (4000 rpm / 60 s) × 2 impulsi = ~133 Hz
 ```
 
-### Partitore di Livello (adattamento 12V → 3.3V)
+### Adattamento livello TACH (verso 3.3 V)
 
-La ventola emette a ~12V (con pull-up interno a 12V), ma ESP32 GPIO accetta max 3.6V.
-
-**Soluzione: Partitore resistivo**
+La ventola 4-pin standard ha il TACH **open-collector** (spesso senza pull-up proprio): il pull-up lo mette la scheda.
 
 ```
-Ventola TACH (giallo, ~12V open-collector) ──┬──── R 10kΩ ──────┬──── GND
-                                              │                  │
-                                              └──── R 4.7kΩ ─────┼──── GPIO 34 (3.3V)
-                                                                 │
-                                              Tensione divisore: Vout = 12V × 4.7k / (10k + 4.7k)
-                                                         Vout ≈ 3.7V (appena sopra 3.3V max)
-                                                         
-⚠️ NOTA: 3.7V è leggermente sopra 3.6V max tollerato.
-Migliore: Usare 15kΩ + 4.7kΩ per Vout = 2.9V
++3.3V ──── R 10kΩ ──┬──── R 1kΩ ──── GPIO 34 (pulse_counter)
+                    │
+Ventola TACH (giallo)┘     (la ventola tira a GND a ogni impulso)
 ```
+
+⚠️ **Prima di collegare, misurare con il tester la tensione del filo giallo a ventola alimentata e scollegata dall'ESP32.** Se è ≈ 0-3.3 V il circuito sopra va bene. Se la ventola ha un pull-up interno a 12 V (tensione > 3.6 V), non usare il pull-up a 3.3 V ma il partitore **15 kΩ (verso GND) + 4.7 kΩ (serie verso GPIO 34)** che porta il segnale a circa 2.9 V.
 
 ### Versione Robusta (con Optoisolatore)
 
@@ -166,52 +160,20 @@ ESPHome `multiply: 0.5` trasforma:
 
 ## 5. Circuito Completo Ventola 4-Pin
 
+La ventola è alimentata **direttamente a +12 V** (dopo F1) e la velocità si regola **solo con il filo PWM (pin 3)**. Nessun MOSFET sull'alimentazione: il TACH resta leggibile in ogni momento.
+
 ```
-+12V_SYS (da PSU ATX) ──────┬─────────────────────────────────────┬──── Ventola +12V (rosso)
-                            │                                     │
-                       Bulk cap                                   │
-                      (470µF già                                  │
-                       montato                                    │
-                       per +12V)                                  │
-                            │                                     │
-╔═══════════════════════════╩═════════════════════════════════════╩═════════════════════════════╗
-║                          DRIVER MOSFET VENTOLA                                               ║
-╚═════════════════════════════════════════════════════════════════════════════════════════════════╝
-
-                            │
-                       ┌────┴────┐
-                       │ Fly-back │  1N5819 Schottky
-                       │  Diode   │  (Anodo→Drain, Catodo→+12V)
-                       │ 1N5819   │
-                       └────┬────┘
-                            │
-                    ┌───────┴───────┐
-                    │   Q1 IRLZ44N  │
-                    │  (Drain here) │
-                    │               │
- GPIO 25 (PWM) ────┼─── R 220Ω ────┼──── Gate
-  25 kHz            │               │
-  0-3.3V            │               │   (Source)
-                    │               ├──── GND via R 10kΩ
-                    │               │
-                    │               │
-                    └───────┬───────┘
-                            │
-                        GND_SYS
-
-
-╔═════════════════════════════════════════════════════════════════════════════════════════════════╗
-║                        SEGNALE TACHIMETRO (FEEDBACK RPM)                                       ║
-╚═════════════════════════════════════════════════════════════════════════════════════════════════╝
-
-Ventola TACH (giallo) ──┬───── R 15kΩ ─────┬──── GND
-  Open-collector        │                  │
-  ~12V pull-up          └──── R 4.7kΩ ─────┼──── GPIO 34 (Pulse Counter)
-  interno               Partitore           │     Livello ~3V IN
-                        2.9V OUT            │
-                                        Decoupling
-                                        100nF (opz.)
++12V_SYS (F1) ───────────────────────────────── Ventola pin 1 (+12V, rosso)
+GND_SYS ─────────────────────────────────────── Ventola pin 2 (GND, nero)
+GPIO 25 (PWM 25 kHz) ── R 220Ω ──────────────── Ventola pin 3 (PWM, verde)
+                                                (pull-up interno nella ventola)
++3.3V ── R 10kΩ ──┬── R 1kΩ ── GPIO 34
+Ventola pin 4 ────┘            (TACH, giallo)
 ```
+
+- Il pull-down del PWM non serve: con ingresso PWM scollegato la ventola gira alla massima velocità (comportamento sicuro).
+- Lo spegnimento completo non è necessario: con PWM 0 % la ventola va al minimo o si ferma, a seconda del modello.
+- Il MOSFET Q1 non è più usato per la ventola ed è **libero** (vedi BOM).
 
 ---
 

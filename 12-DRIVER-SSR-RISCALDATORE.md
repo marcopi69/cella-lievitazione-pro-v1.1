@@ -9,19 +9,17 @@ Il filo scaldante a 220V AC (90W) è controllato tramite un **Solid State Relay 
 Questa è la topologia **corretta e definitiva** della v1.1 (corregge errori di v1.0):
 
 ```
-GPIO 32 (3.3V logic) ─────┬────── R 10kΩ (base) ─────┬────── Base BC547
-                          │                         │
-                          └─────────────────────────┴────── Gate-control
+GPIO 32 (3.3V logic) ──── R 10kΩ (base) ──┬────── Base BC547
+                                          └────── R 100kΩ ──── GND  (pull-down base)
 
 BC547 Saturato (GPIO HIGH):
-  Collettore ─────┬────── SSR- (controllo negativo) ─┬──── Verso SSR
-                  │                                  │
-                  └────── R 100kΩ (pull-down) ───────┴──── Verso GND
-                  
-  Emettitore ─────────────────────────────── GND (Massa comune)
-  
-SSR+ (controllo positivo) ────────────────── +5V DA PSU ATX (sempre)
+  Collettore ─────────────────── SSR- (controllo negativo)
+  Emettitore ─────────────────── GND (Massa comune)
+
+SSR+ (controllo positivo) ────────────────── +5V da PSU (sempre)
 ```
+
+Il pull-down sulla base tiene il BC547 spento (SSR spento) mentre il GPIO è flottante durante boot e reset.
 
 ---
 
@@ -34,33 +32,20 @@ SSR+ (controllo positivo) ──────────────────
 
 ESP32 GPIO32 (3.3V PWM/logic output)
         │
-        ├───────────── R 10kΩ (R_base) ──────────┬──── Base BC547 (Q5)
-        │                                        │
-        │                                   ┌────┴────┐
-        │                                   │ BC547    │
-        │                                   │ NPN BJT  │
-        │                                   │          │
-        │    +5V_SYS (PSU ATX) ─────────────┼──────────┼───── SSR+ (pin 2)
-        │         │                         │          │
-        │         │                    Coll.(High)   Base
-        │         │                         │          │
-        │         └─────────────────────────┼──────────┘
-        │                                   │
-        │                                   ├───── R 100kΩ (R_pull) ───── GND
-        │                                   │
-        │                              Emett.(Base gnd)
-        │                                   │
-        │                                   └───── GND_SYS
-        │
-        └─────────────── SSR- (pin 1) ────── (Controllo negativo)
-        
+        └── R 10kΩ (R_base) ──┬── Base BC547 (Q5)
+                              └── R 100kΩ (R_pull) ── GND
+
+    +5V_SYS ───────── SSR+ (pin 2)
+    Collettore Q5 ─── SSR- (pin 1)
+    Emettitore Q5 ─── GND_SYS
+
 [Nota: SSR ha controllo a due poli: SSR+ sempre a +5V, SSR- commutato da BC547]
 
 ╔════════════════════════════════════════════════════════════════════════════╗
 ║                         LINEA RISCALDATORE 220V AC                         ║
 ╚════════════════════════════════════════════════════════════════════════════╝
 
-Rete 220V AC ──┬────── Fusibile F_HEAT (1A SB, 250V) ──────┬──── Fase (L)
+Rete 220V AC ──┬────── Fusibile F_HEAT (2A SB, 250V) ──────┬──── Fase (L)
                │                                           │
                │                                      ┌────┴────┐
                │                                      │ SSR-25DA │
@@ -217,19 +202,18 @@ SSR-25DA accetta 3-32V DC ✓ 4.8V è ben dentro il range
 
 ## 5. Protezioni e Sicurezza
 
-### 5.1 Fusibile Linea Riscaldatore (F_HEAT 1A SB)
+### 5.1 Fusibile Linea Riscaldatore (F_HEAT 2A SB)
 
 **Calcolo:**
 
 ```
 Filo scaldante: 90W @ 220V AC
 Corrente nominale: I = 90W / 220V ≈ 0.41A
-Fusibile scelto: 1A Slow Blow
+Fusibile scelto: 2A Slow Blow
 
-Margine: 1A / 0.41A ≈ 2.4× ✓
-
-Slow Blow tollera transitoriamente fino a 2-3A per 5-10 secondi
-senza intervenire (ideale per carichi resistivi senza spunto)
+I cavi autoregolanti assorbono uno spunto a freddo di diverse volte la corrente
+nominale: un fusibile da 1A rischia di saltare all'accensione.
+Margine: 2A / 0.41A ≈ 4.9× ✓ (il SSR e i cavi proteggono dal cortocircuito)
 ```
 
 ### 5.2 Termostato Meccanico di Sicurezza ⚠️
@@ -241,14 +225,14 @@ Problema: Se SSR rimane acceso in cortocircuito,
           il software non lo sa e il filo può surriscaldarsi indefinitamente.
 
 Soluzione: Termostato meccanico bimetallico
-           - Interviene a ~45-50°C (temper. massima cell)
+           - Interviene a ~55°C (sopra il range di lavoro 40°C e l'allarme software 45°C)
            - Apre il circuito di alimentazione AC
            - Completamente indipendente dall'elettronica
            
 Montaggio: In serie al neutro del riscaldatore,
            fisicamente vicino al filo scaldante
            
-Specifiche: Bimetallico, reset manuale, 45°C ± 5°C
+Specifiche: Bimetallico NC, reset manuale, 55°C ± 5°C
 ```
 
 ### 5.3 Isolamento e Layout
@@ -362,8 +346,8 @@ automation:
 | **Freq PWM GPIO32** | 1 kHz | 100 Hz - 5 kHz | SSR tollera bene, non critico |
 | **SSR+ (controllo+)** | +5V sempre | 3-32V DC | Diretto da PSU ATX |
 | **SSR- (controllo-)** | Collettore BC547 | 0V (ON) - flottante (OFF) | Commutato da transistor |
-| **Fusibile F_HEAT** | 1A Slow Blow 250V | 0.5-1.5A | Protezione contro cortocircuito AC |
-| **Termostato meccanico** | 45°C ± 5°C reset manuale | 40-50°C | **ESSENZIALE**, fail-safe |
+| **Fusibile F_HEAT** | 2A Slow Blow 250V | 1.5-3A | Protezione contro cortocircuito AC |
+| **Termostato meccanico** | 55°C ± 5°C reset manuale | 50-60°C | **ESSENZIALE**, fail-safe |
 
 ---
 

@@ -147,52 +147,13 @@ Tre carichi DC a bassa tensione (+12V e +24V) sono controllati tramite MOSFET N-
 | GPIO PWM | 25 | PWM LEDC |
 | GPIO TACH | 34 | Pulse counter per misura RPM |
 
-### Circuito Ventola (Low-Side PWM)
+### Circuito Ventola
 
-```
-+12V_SYS ──┬─────────────────────────────────────────────────┐
-      │                                                           │
-      │                                                     ┌─────┴─────┐
-      │                                                     │    Fly-back  │
-      │                                                     │    1N5819    │
-      │                                                     │    Anodo     │
-      │                                                     └────┴─────┘
-      │                                                          │
-      │                                                   ┌────▼──────┐
-      │                                                   │  Ventola   │
-      │                                                   │  (+12V,    │
-      │                                                   │  GND,      │
-      │                                                   │  PWM, TAC) │
-      │                                                   │            │
-      └─────────────────────────────────────────────────┴───────────┘
-                                                                Drain Q1
-
-GPIO 25 (PWM 25kHz) ── R 220Ω ── Gate Q1 (IRLZ44N) ── R 10kΩ pull-down ─ GND
-```
-
-### Parametri Circuito
-
-| Elemento | Valore | Calcolo/Notes |
-|---|---|---|
-| **R_gate** | 220 Ω | Limitazione di corrente, protezione ESD |
-| **R_pull** | 10 kΩ | Pull-down gate, impedisce flottamento al boot |
-| **Fly-back diode** | 1N5819 Schottky | **CRITICO**: protegge da picchi BEMF del motore |
-| **Fly-back position** | Anodo drain, catodo +12V | Assorbe picchi induttivi durante turn-off |
-| **PWM freq** | 25 kHz | Riduce rumore acustico del MOSFET |
-| **Duty cycle** | 0–100% | Controllo velocità ventola 0–100% |
-| **Spunto (10–50ms)** | 0.8A max | Fusibile F1 (2A SB) tollera benissimo |
+> **Modifica v1.1:** la ventola 4-pin **non** usa più il MOSFET Q1. È alimentata direttamente a +12 V e regolata con il filo PWM (pin 3) da GPIO 25; il TACH (pin 4) va su GPIO 34. Schema completo in `15-VENTOLA-PWM-4PIN.md`, sez. 5. Il MOSFET Q1 resta libero come uscita 12 V di riserva.
 
 ### Calcolo Dissipazione Ventola
 
-```
-Potenza nominale: P = 0.3A × 12V = 3.6W
-Rds_on IRLZ44N: 22 mΩ @ 5V, ≈ 25-30 mΩ @ 3.3V
-Potenza dissipata MOSFET (a 0.3A): P_diss = (0.3A)^2 × 25mΩ ≈ 2.25mW
-
-Elevazione T: ΔT = 2.25mW × 62°C/W ≈ 0.14°C
-
-✅ Dissipatore NO necessario. MOSFET può stare su pad di rame 0.5 cm² per dissipazione passiva.
-```
+Nessun elemento di commutazione sulla ventola: dissipazione sul MOSFET nulla.
 
 ---
 

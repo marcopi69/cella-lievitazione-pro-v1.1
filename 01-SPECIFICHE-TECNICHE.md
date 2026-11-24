@@ -109,7 +109,8 @@ La cella di lievitazione PRO è un sistema completamente autonomo per il control
 
 | Componente | Qt. | Specifica | Funzione | Note |
 |-----------|-----|---------|---------|-------|
-| **Alimentatore ATX** | 1 | 260 W, +5 V / +12 V / ±12 V / +24 V | Alimentazione sistema | Cortocircuitare PS_ON (pin 16, verde) con GND (pin 15, nero) oppure usare resistenza 1 kΩ |
+| **Alimentatore ATX** | 1 | PC recuperato, +5 V / +12 V | Alimentazione logica, ventola, LED | Cortocircuitare PS_ON (pin 16, verde) con GND (pin 15, nero) |
+| **Alimentatore 24 V (PSU24)** | 1 | 24 V DC / 2 A, switching | Solo umidificatore (non ancora integrato) | Fusibile F_24 1 A; GND unita a GND_SYS |
 | **Connettore J2 (PSU)** | 1 | Morsettiera KF350 5.08 mm 3 pin | Ingresso +5V, +12V, GND | Corrente max 10 A per pin |
 
 ### 2.12 Protezioni Alimentazione
@@ -185,7 +186,7 @@ La cella di lievitazione PRO è un sistema completamente autonomo per il control
 
 | Carico | Corrente nominale | Corrente spunto | Potenza | Note |
 |--------|-------------------|-----------------|---------|-------|
-| Filo scaldante 90 W | 0.41 A | Nessuno (resistivo) | 90 W | Fusibile F_HEAT: 1 A Slow Blow ✅ |
+| Filo scaldante 90 W | 0.41 A | Nessuno (resistivo) | 90 W | Fusibile F_HEAT: 2 A Slow Blow ✅ |
 
 ### 3.5 Riepilogo Totale
 
@@ -194,8 +195,8 @@ La cella di lievitazione PRO è un sistema completamente autonomo per il control
 | +5 V | ~680 mA (picco) | ~3.4 W | 2 A SB |
 | +12 V | ~2.0 A (picco) | ~24 W | 2 A SB |
 | +24 V | ~1.5 A (picco) | ~20 W | 1 A SB |
-| **220 V AC** | **0.41 A** | **90 W** | **1 A SB** |
-| **CONSUMO TOTALE** | **~4.6 A @ 12 V equiv.** | **~140 W** | **PSU ATX 260 W ✅** |
+| **220 V AC** | **0.41 A** | **90 W** | **2 A SB** |
+| **CONSUMO TOTALE** | **~4.6 A @ 12 V equiv.** | **~140 W** | **PSU ATX + PSU24 ✅** |
 
 ✅ **Il PSU ATX da 260 W eroga tipicamente 15–20 A sulla linea +12 V combinata. Siamo abbondantemente nei limiti.**
 
@@ -241,8 +242,8 @@ La cella di lievitazione PRO è un sistema completamente autonomo per il control
         │  GPIO 18/19/21: Encoder + pulsanti; 22: MF; 23: luci │
         │  GPIO 22: Pulsante multifunzione; 23: Pulsante luci │
         │                                        │
-        │  Alimentazione: PSU ATX 260 W         │
-        │  (+5V, +12V, +24V)                    │
+        │  Alimentazione: PSU ATX (+5V, +12V)   │
+        │  + PSU24 24V (umidificatore)          │
         └────────┬─────────────────────────────┘
                  │
         ┌────────▼────────┐
@@ -270,11 +271,11 @@ La cella di lievitazione PRO è un sistema completamente autonomo per il control
 | Sovratensione +12 V | TVS 1.5KE24A | Clamp a 24 V, assorbe picchi transitori |
 | Sovracorrente +12 V | Fusibile F1 2A SB | Interrompe se corrente > 2 A per > 5 s |
 | Sovracorrente +5 V | Fusibile F2 2A SB | Interrompe se corrente > 2 A per > 5 s |
-| Sovracorrente 220 V | Fusibile F_HEAT 1A SB | Protezione linea riscaldatore |
+| Sovracorrente 220 V | Fusibile F_HEAT 2A SB | Protezione linea riscaldatore |
 | BEMF ventola | Diodo 1N5819 fly-back | Assorbe spike induttivo al turnoff MOSFET |
 | BEMF umidif. | Diodo 1N5819 fly-back | Assorbe spike induttivo al turnoff MOSFET |
 | Sottoalimentazione | Condensatori bulk 100µF+470µF | Stabilizzazione tensione, noise filtering |
-| Riscaldatore runaway | ⚠️ **TERMOSTATO MECCANICO** | **Interviene se T > 45°C** |
+| Riscaldatore runaway | ⚠️ **TERMOSTATO MECCANICO** | **Interviene se T > 55°C** |
 | SSR guasto | Interlock software | Se SSR si incolla, cortocircuito filo → fusibile interviene |
 | Corto circuito GPIO | Resistenza serie gate 220 Ω | Limita corrente picco |
 

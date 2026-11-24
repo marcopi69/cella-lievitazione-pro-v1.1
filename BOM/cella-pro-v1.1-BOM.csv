@@ -3,10 +3,10 @@
 ```
 Quantity,Designator,Part Number,Value,Footprint,Description,Supplier,Unit Cost EUR,Total EUR
 1,U1,ESP32-DEVKITC-E32,,DIP-38,ESP32-DevKitC-E (WROOM-32E),Espressif/AliExpress,12.00,12.00
-1,U2,SHT45,,0402,Sensore T/RH I2C precisione,Sensirion,10.50,10.50
-1,U3,SCD41,,0402,Sensore CO2 NDIR I2C 400-5000ppm,Sensirion,35.00,35.00
+1,U2,SHT45,breakout,Modulo I2C,Modulo sensore T/RH I2C precisione (breakout),Sensirion/Adafruit,12.00,12.00
+1,U3,SCD41,breakout,Modulo I2C,Modulo sensore CO2 NDIR I2C (breakout),Sensirion/Adafruit,38.00,38.00
 2,U4 U5,DS18B20,,DIP-8,Sensore T 1-Wire impermeabile,Maxim,2.50,5.00
-1,U6,PCA9548A,,TSSOP-16,I2C Multiplexer 8 canali,Texas Instruments,3.50,3.50
+1,U6,PCA9548A,,TSSOP-24,I2C Multiplexer 8 canali (su adattatore DIP o modulo),Texas Instruments,3.50,3.50
 3,Q1 Q2 Q3,IRLZ44N,,TO-220,MOSFET N-ch logic-level 55V,Infineon,1.20,3.60
 1,Q5,BC547,,TO-92,Transistor NPN BJT,Various,0.15,0.15
 1,K1,SSR-25DA,,DIP-4 Package,Solid State Relay AC 220V 25A,Various,8.50,8.50
@@ -19,13 +19,15 @@ Quantity,Designator,Part Number,Value,Footprint,Description,Supplier,Unit Cost E
 1,U7,Display Nextion/TJC 5in UART,,UART 3.3V,Display 5 inch 800x480 con touch,AliExpress/ITEAD,45.00,45.00
 1,FAN1,Ventola DC 12V,60mm 4-PIN,2.54 JST,Ventola ricircolo PWM 25kHz,Noctua/AliExpress,20.00,20.00
 1,HUMID1,Modulo Umidificatore,,2-PIN,Umidificatore ultrasuoni 24V,AliExpress,12.00,12.00
-1,LED_STRIP,Striscia LED RGB,,2-PIN/DIN,WS2812B RGB/RGBW 12V 60 LED,AliExpress,8.00,8.00
-1,PSU1,Alimentatore ATX,260W,ATX Connector,PSU ATX 260W +5V/+12V/+24V,AliExpress,18.00,18.00
+1,LED_STRIP,Striscia LED 12V monocolore,,2-PIN,Striscia LED bianca 12V (pilotata da Q2),AliExpress,6.00,6.00
+1,PSU1,Alimentatore ATX recuperato,,ATX Connector,PSU ATX +5V/+12V (PS_ON a GND),Recupero PC,8.00,8.00
+1,PSU24,Alimentatore 24V,24V 2A,Switching,Alimentatore 24V DC 2A per umidificatore,AliExpress,12.00,12.00
+1,F_24,Fusibile 1A SB,5x20mm 250V,5x20 Cartridge,Fusibile Slow Blow +24V,AliExpress,0.20,0.20
 1,F1,Fusibile 2A SB,5x20mm 250V,5x20 Cartridge,Fusibile Slow Blow +12V,AliExpress,0.20,0.20
 1,F2,Fusibile 2A SB,5x20mm 250V,5x20 Cartridge,Fusibile Slow Blow +5V,AliExpress,0.20,0.20
-1,F_HEAT,Fusibile 1A SB,5x20mm 250V,5x20 Cartridge,Fusibile Slow Blow riscaldatore 220V,AliExpress,0.20,0.20
+1,F_HEAT,Fusibile 2A SB,5x20mm 250V,5x20 Cartridge,Fusibile Slow Blow riscaldatore 220V,AliExpress,0.20,0.20
 1,D1,TVS Diodo,1.5KE24A,DO-201,Diodo TVS unipolare protezione picchi +12V,AliExpress,0.30,0.30
-2,D2 D3,Diodo 1N5819,,DO-41,Diodo Schottky fly-back fly-back,AliExpress,0.10,0.20
+1,D2,Diodo 1N5819,,DO-41,Diodo Schottky fly-back umidificatore,AliExpress,0.10,0.10
 1,C1,Capacitor,100µF 25V,Radial-10mm,Capacitor elettrolitico bulk +5V,AliExpress,0.15,0.15
 1,C2,Capacitor,470µF 25V,Radial-12mm,Capacitor elettrolitico bulk +12V,AliExpress,0.20,0.20
 1,C3,Capacitor,470µF 25V,Radial-12mm,Capacitor elettrolitico bulk +12V ventola,AliExpress,0.20,0.20
@@ -34,16 +36,16 @@ Quantity,Designator,Part Number,Value,Footprint,Description,Supplier,Unit Cost E
 1,C6,Capacitor,100nF 50V,0805 Ceramic,Decoupling +12V,AliExpress,0.05,0.05
 1,C7,Capacitor,100nF 50V,0805 Ceramic,Decoupling +24V,AliExpress,0.05,0.05
 1,C_BOOT,Capacitor,100nF 50V,0805 Ceramic,Decoupling pulsante RESET,AliExpress,0.05,0.05
-3,R_gate,Resistor,220Ω 1/4W,0207 axial,Resistore gate MOSFET x3,AliExpress,0.02,0.06
-7,R_pull,Resistor,10kΩ 1/4W,0207 axial,Resistore pull-up/pull-down x7,AliExpress,0.02,0.14
-4,R_I2C,Resistor,4.7kΩ 1/4W,0207 axial,Resistore pull-up I2C bus x4,AliExpress,0.02,0.08
-2,R_TACH,Resistor,4.7kΩ 1/4W,0207 axial,Resistore partitore tachimetro,AliExpress,0.02,0.04
+3,R_gate,Resistor,220Ω 1/4W,0207 axial,Resistore gate MOSFET x3 (Q1 libero),AliExpress,0.02,0.06
+8,R_pull,Resistor,10kΩ 1/4W,0207 axial,Pull-up/pull-down x8 (gate x3, base SSR, tach pull-up, RESET mux),AliExpress,0.02,0.16
+5,R_I2C,Resistor,4.7kΩ 1/4W,0207 axial,Pull-up I2C (SDA SCL ramo mux ch3 ch4) e 1-Wire,AliExpress,0.02,0.10
+1,R_PWM,Resistor,220Ω 1/4W,0207 axial,Serie PWM ventola (GPIO25),AliExpress,0.02,0.02
+1,R_TACH,Resistor,1kΩ 1/4W,0207 axial,Serie TACH ventola (GPIO34),AliExpress,0.02,0.02
 1,R_LED,Resistor,330Ω 1/4W,0207 axial,Serie dato WS2812 (GPIO16),AliExpress,0.02,0.02
 1,D_LED,1N4148,,DO-35,Diodo serie alimentazione LED (+5V -> ~4.4V),AliExpress,0.03,0.03
-1,R_TACH_H,Resistor,15kΩ 1/4W,0207 axial,Resistore partitore TACH alto,AliExpress,0.02,0.02
-1,R_COL,Resistor,100kΩ 1/4W,0207 axial,Resistore pull-down collettore BC547,AliExpress,0.02,0.02
+1,R_COL,Resistor,100kΩ 1/4W,0207 axial,Pull-down BASE BC547 (SSR spento al boot),AliExpress,0.02,0.02
 1,HEATER,Filo Scaldante,90W 220V,,Filo autoregolante 5m 18W/m,AliExpress,12.00,12.00
-1,THERMOSTAT,Termostato Mecc.,45±5°C,Bimetallico,Protezione termica filo scaldante CRITICO,AliExpress,3.00,3.00
+1,THERMOSTAT,Termostato Mecc. NC,55±5°C,Bimetallico,Protezione termica in serie al filo scaldante CRITICO,AliExpress,3.00,3.00
 1,CABLE_1W,Cavo Schermato,22AWG 5m,,Cavo 1-Wire DS18B20 schermato,AliExpress,2.00,2.00
 1,J_DS1,Connettore JST 3-pin,,2.54mm Pitch,Connettore DS18B20 sonda 1,AliExpress,0.30,0.30
 1,J_DS2,Connettore JST 3-pin,,2.54mm Pitch,Connettore DS18B20 sonda 2,AliExpress,0.30,0.30
@@ -68,12 +70,12 @@ Quantity,Designator,Part Number,Value,Footprint,Description,Supplier,Unit Cost E
 1,,Kit Cavi Jumper,,22 AWG 10 colori 100m,Cavi per interconnessioni PCB,AliExpress,5.00,5.00
 1,,Connettori DuPont,,20-pin Kit,Connettori dupont (opzionale prototipo breadboard),AliExpress,1.00,1.00
 
-TOTAL ESTIMATED COST: 250.00 EUR
+TOTAL ESTIMATED COST: 234.20 EUR
 
 NOTE:
 - Prezzi sono stime AliExpress/Mouser medio 2026
 - Lead time: SCD41 può essere raro, ordinare con anticipo (2-4 settimane)
-- PSU ATX: può essere ricondizionato da vecchio PC (~5-8€)
+- PSU ATX: recuperato da vecchio PC; il +24 V per l'umidificatore viene da un alimentatore separato (PSU24)
 - Ventola Noctua (20€): silenziosa; alternative economiche: Be Quiet (12€) o generiche (5€)
 - Display Nextion/TJC 5": verificare livello TX (3.3 V o 5 V) prima del collegamento a GPIO 27
 - Tutti i componenti sono THT o connettori standard per facilità montaggio prototipo

@@ -102,11 +102,15 @@ Regole d'uso:
 ```
 ESP32 SDA (GPIO 4) ──┬── R 4.7kΩ ── +3.3V (pull-up bus principale)
                     │
-                    └── PCA9548A pin 9 (SDA IN)
+                    └── PCA9548A pin 23 (SDA)
 
 ESP32 SCL (GPIO 5) ──┬── R 4.7kΩ ── +3.3V (pull-up bus principale)
                     │
-                    └── PCA9548A pin 1 (SCL IN)
+                    └── PCA9548A pin 22 (SCL)
+
+PCA9548A (TSSOP-24): pin 24 VCC = +3.3V, pin 12 GND,
+  pin 1 (A0), pin 2 (A1), pin 21 (A2) a GND → indirizzo 0x70,
+  pin 3 (RESET) a +3.3V tramite 10 kΩ (+ 100 nF verso GND), VCC con 100 nF vicino al chip.
 ```
 
 **Nota:** Pull-up unici sul bus principale. Ogni canale del PCA9548A ha i propri pull-up sui pin SCx/SDx.
@@ -127,49 +131,35 @@ DS18B20 VCC ──── +3.3V (alimentazione parassita NON raccomandata, usare 
 ### Ventola 4-pin PWM (GPIO 25, 34)
 
 ```
-Ventola Pin 1 (+12V) ───────────────── Linea +12V da PSU
-Ventola Pin 2 (GND)  ────┬──── Drain MOSFET Q1 (IRLZ44N)
-                        │
-                        └──── GND comune (ESP32)
+Ventola Pin 1 (+12V) ───────────────── Linea +12V (dopo F1)
+Ventola Pin 2 (GND)  ───────────────── GND comune
 
-Ventola Pin 3 (PWM)  ───── GPIO 25 (LEDC PWM, 25 kHz)
+Ventola Pin 3 (PWM)  ───── R 220Ω ───── GPIO 25 (LEDC PWM, 25 kHz)
 
-Ventola Pin 4 (TACH) ──┬── R 10kΩ ── +3.3V (partitore livello, opzionale se ventola output 3.3V)
-                      │
-                      └── GPIO 34 (pulse_counter in ESPHome)
+Ventola Pin 4 (TACH) ──┬── R 10kΩ ── +3.3V
+                       └── R 1kΩ ── GPIO 34 (pulse_counter in ESPHome)
 ```
 
-**Attenzione:** Il tach è open-collector con pull-up interno a 12V nella ventola. Se è un valore alto, usare partitore 10k+4.7k verso GND. Se diretto a 3.3V, rischio di tensione reverse su GPIO. Verificare il datasheet della ventola specifica.
+**Attenzione:** misurare con il tester la tensione del TACH a ventola alimentata. Se supera 3.6 V (pull-up interno a 12 V) usare il partitore 15 kΩ / 4.7 kΩ descritto in `15-VENTOLA-PWM-4PIN.md`.
 
 ### SSR Riscaldatore (GPIO 32)
 
 ```
-GPIO 32 ──── R 10kΩ (base) ──── Base BC547
+GPIO 32 ──── R 10kΩ (base) ──┬── Base BC547
+                             └── R 100kΩ ──── GND  (pull-down: SSR spento all'avvio)
 
-BC547 Collettore ──┬── R 100kΩ (pull-down, sicurezza) ──── GND
-                  │
-                  └── SSR- (polo negativo controllo SSR)
+BC547 Collettore ──── SSR- (polo negativo controllo SSR)
 
-SSR+ (polo positivo controllo) ──── +5V da PSU ATX
+SSR+ (polo positivo controllo) ──── +5V da PSU
 
 BC547 Emettitore ──── GND
 ```
 
-**Logica:** GPIO HIGH → BC547 saturo → Collettore ≈ 0V → SSR vede +5V su SSR+ e GND su SSR- → **SSR acceso**.
+**Logica:** GPIO HIGH → BC547 saturo → Collettore ≈ 0V → SSR vede +5V su SSR+ e GND su SSR- → **SSR acceso**. Con GPIO flottante (boot, reset) il pull-down sulla base tiene il BC547 spento e quindi l'SSR spento.
 
-### MOSFET Ventola (GPIO 25)
+### MOSFET Q1 (libero)
 
-```
-GPIO 25 (PWM) ──── R 220Ω ──── Gate MOSFET Q1 (IRLZ44N)
-                            │
-                            └── R 10kΩ pull-down verso GND
-
-Drain Q1 ──┬── Ventola GND (nero)
-           │
-           └── Anodo 1N5819 (fly-back, catodo verso +12V)
-
-Source Q1 ──── GND
-```
+Il MOSFET Q1 non è più usato per la ventola (vedi `15-VENTOLA-PWM-4PIN.md`, sez. 5). Resta disponibile come uscita 12 V ON/OFF di riserva, pilotabile da GPIO 17 (J_EXP).
 
 ---
 

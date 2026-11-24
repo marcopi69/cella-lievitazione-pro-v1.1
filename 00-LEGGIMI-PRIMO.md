@@ -67,7 +67,7 @@
 | **Ricircolo aria** | Ventola 12 V 4-pin PWM + tach, 0–100% speed control |
 | **Illuminazione** | Striscia LED 12 V RGB/RGBW dimmerizzata |
 | **Interfaccia utente** | Display Nextion/TJC 5" UART con touch + encoder rotativo + pulsante MF + pulsante luci LED |
-| **Alimentazione** | PSU ATX 260 W (+5 V, +12 V, +24 V) |
+| **Alimentazione** | PSU ATX recuperato (+5 V, +12 V) + alimentatore 24 V per umidificatore |
 | **Protezioni** | Fusibili slow-blow, TVS, diodi fly-back, termostato meccanico |
 | **Volume interno** | 60 × 60 × 55 cm (≈ 198 litri) |
 | **Integrazione** | ESPHome + Home Assistant (Wi-Fi, offline-capable) |

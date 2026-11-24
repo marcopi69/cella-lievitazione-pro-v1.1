@@ -12,37 +12,37 @@
                   │                              │
             ┌─────▼─────┐                ┌──────▼──────┐
             │ PSU ATX   │                │ FUSIBILE    │
-            │ 260 W     │                │ F_HEAT 1A   │
+            │ (recupero)│                │ F_HEAT 2A   │
             │ +5V       │                │ (Riscald.)  │
             │ +12V      │                └──────┬──────┘
-            │ +24V      │                       │
-            └─┬───┬───┬─┘                 ┌─────▼─────┐
-              │   │   │                   │    SSR    │
-              │   │   │                   │  25A AC   │
-              │   │   │                   │(Riscald.) │
-         +5V  │   │   │  +24V             └─────┬─────┘
-              │   │   │                         │
-    ┌─────────┘   │   └────────────┐     ┌──────▼───────┐
-    │             │                │     │ Filo Scaldante
-    │         +12V│                │     │ 90W @ 220V AC
-    │             │                │     └──────────────┘
-    │             │        ┌───────▼────────┐
-    │             │        │ UMIDIFICATORE  │
-    │             │        │ 24V DC <= 1.5A │
-    │             │        └────────────────┘
+            │           │   ┌───────┐           │
+            └─┬───┬─────┘   │ PSU24 │     ┌─────▼─────┐
+              │   │         │ 24V 2A│     │    SSR    │
+              │   │         └───┬───┘     │  25A AC   │
+              │   │             │ +24V    │(Riscald.) │
+         +5V  │   │             │         └─────┬─────┘
+              │   │             │               │
+    ┌─────────┘   │      ┌──────┘        ┌──────▼───────┐
+    │             │      │               │ Filo Scaldante
+    │         +12V│      │               │ 90W @ 220V AC
+    │             │      │               └──────────────┘
+    │             │ ┌────▼───────────┐
+    │             │ │ UMIDIFICATORE  │
+    │             │ │ 24V DC <= 1.5A │
+    │             │ └────────────────┘
     │             │
     │  ┌──────────┴──────────┬──────────┐
     │  │                     │          │
   ┌─▼──▼──┐           ┌──────▼──┐  ┌───▼────┐
   │ ESP32  │           │ VENTOLA │  │ LED    │
   │ (3.3V) │           │ 12V PWM │  │ 12V    │
-  │        │           └────┬────┘  └────┬───┘
-  │        │                │            │
-  │        │           ┌────▼────┐  ┌────▼───┐
-  │        │           │ MOSFET  │  │ MOSFET │
-  │        │           │ Q1      │  │ Q2     │
-  │        │           │ PWM/dig │  │ PWM/dig│
-  │        │           └────┬────┘  └────┬───┘
+  │        │           │ (filo   │  └────┬───┘
+  │        │           │  PWM)   │       │
+  │        │           └─────────┘  ┌────▼───┐
+  │        │                        │ MOSFET │
+  │        │                        │ Q2     │
+  │        │                        │ PWM/dig│
+  │        │                        └────┬───┘
   │        │                │            │
   │  ┌─────▼────┐      ┌────▼───┐  ┌────▼───┐
   │  │ I²C BUS  │      │+12V_SYS│  │+12V_SYS│
@@ -170,39 +170,16 @@ PSU ATX +12V OUT ────┬──── TVS 1.5KE24A ──── +12V_prot
 
 ---
 
-## 4. Linea +24V (da PSU ATX o alimentatore esterno)
+## 4. Linea +24V (alimentatore esterno dedicato PSU24)
 
-### Opzione A: PSU ATX con linea +24V nativa (rara)
-
-```
-PSU ATX +24V OUT ──── Fusibile 1A SB ──── +24V_SYS ──┬──── C5 (470µF) ──┬── GND
-                                                     │                  │
-                                              Umidificatore         Decoupl.
-                                              MOSFET Q3              C6
-                                              (GPIO 26)              100nF
-```
-
-### Opzione B: Alimentatore switching 24V esterno dedicato (consigliato)
+Gli alimentatori ATX **non hanno** una linea +24 V. Il sistema usa quindi **due alimentatori**: il PSU ATX recuperato (+5 V / +12 V) e un alimentatore switching 24 V / 2 A (PSU24) dedicato all'umidificatore. L'umidificatore non è ancora integrato: la sezione è predisposta.
 
 ```
-Alimentatore 24V/2A ──┬──── Fusibile 1A SB ──── +24V_SYS
-(esterno)            │
-                 Protezione
-                     │
-                ┌────▼────┐
-                │   F_24  │
-                │ 1A SB   │
-                └────┬────┘
-                     │
-              ┌──────┴─────┐
-              │            │
-          ┌───▼──┐    ┌────▼──┐
-          │ C5   │    │ C6    │
-          │470µF │    │ 100nF │
-          │35V   │    │       │
-          └───┬──┘    └───┬───┘
-              │           │
-           GND_SYS ───GND_SYS
+PSU24 (24V/2A) ── Fusibile F_24 (1A SB) ── +24V_SYS ──┬── C5 (470µF 35V) ── GND
+                                                      ├── C6 (100nF) ── GND
+                                                      └── Umidificatore (+) ... (−) Drain Q3 (GPIO 26)
+
+GND di PSU24 collegata alla GND_SYS (massa comune con il PSU ATX, un solo punto di unione).
 ```
 
 ### Carichi Alimentati @ +24V
@@ -227,7 +204,7 @@ Alimentatore 24V/2A ──┬──── Fusibile 1A SB ──── +24V_SYS
          │                                             │
     ┌────▼──────────┐                            ┌─────▼──────────┐
     │ Fusibile      │                            │ Nessun          │
-    │ F_HEAT 1A SB  │                            │ interruttore    │
+    │ F_HEAT 2A SB  │                            │ interruttore    │
     │ 250V 5×20mm   │                            │ (sempre passivo)│
     └────┬──────────┘                            └────────────────┘
          │
@@ -242,23 +219,27 @@ Alimentatore 24V/2A ──┬──── Fusibile 1A SB ──── +24V_SYS
     ┌────▼──────────┐
     │  Filo Scaldan │ 90W @ 220V, autoregolante 18W/m × 5m
     │  Termostato   │ ◄─── TERMOSTATO MECCANICO di sicurezza
-    │  meccanico    │     (interviene se T > 45°C)
+    │  meccanico    │     (apre il circuito se T > 55°C)
     └────┬──────────┘
          │
     ┌────▼──────────┐
     │ Neutro (N)    │ ← Ritorno a rete
     └───────────────┘
+
+Terra (PE): collegare il conduttore di terra della presa a PSU ATX (massa chassis),
+scatola metallica e carcassa/dissipatore SSR. Il PE NON va collegato alla GND a bassa tensione.
 ```
+
+Il termostato è **normalmente chiuso, in serie** al filo scaldante: se la temperatura supera la soglia, interrompe il carico anche con SSR in cortocircuito.
 
 ### Driver SSR (a bassa tensione, 5V DC)
 
 ```
-GPIO 32 (3.3V logic) ──── R 10kΩ ──── Base BC547 (Q5)
+GPIO 32 (3.3V logic) ──── R 10kΩ ──┬── Base BC547 (Q5)
+                                   └── R 100kΩ (pull-down) ── GND
 
 BC547 Saturato:
-  Collettore ──┬── R 100kΩ (pull-down) ──── GND
-               │
-               └── SSR- (controllo negativo)
+  Collettore ──── SSR- (controllo negativo)
   Emettitore ──── GND
 
 SSR+ ──── +5V da PSU ATX (sempre collegato)
@@ -270,8 +251,8 @@ SSR- ──── Collettore BC547 (commutato)
 | Protezione | Componente | Funzione |
 |-----------|-----------|----------|
 | **Protezione differenziale** | RCD 30mA (opzionale, consigliato) | Interviene se corrente Fase ≠ Neutro |
-| **Protezione sovracorrente** | Fusibile F_HEAT 1A SB 250V | Slow-blow, tolera spunti resistivi |
-| **Protezione termica hardware** | **Termostato meccanico** | **ESSENZIALE: interviene se T > 45°C** |
+| **Protezione sovracorrente** | Fusibile F_HEAT 2A SB 250V | Slow-blow, tolera lo spunto a freddo del filo autoregolante |
+| **Protezione termica hardware** | **Termostato meccanico 55°C** | **ESSENZIALE: sopra il range di lavoro (max 40°C) e sopra l'allarme software (45°C)** |
 | **Controllo SSR** | BC547 + R 10kΩ base | Pilotaggio affidabile, fail-safe (SSR spento se GPIO flottante) |
 | **Isolamento** | Scatola separata certificata IP40 | Separazione cella da circuiti ad alta tensione |
 
@@ -339,7 +320,7 @@ Se ambiente: 35°C → T_SSR ≈ 59°C → Dissipatore da 10 cm² minimo consigl
 | **+5V** | Fusibile F2 2A SB | Condensatori bulk/ceramic | Se F2 salta: niente ESP32, circuito OFF |
 | **+12V** | Fusibile F1 2A SB + TVS | Diodi fly-back MOSFET | Se F1 salta: no LED, no ventola, circuito parziale |
 | **+24V** | Fusibile 1A SB | 1N5819 fly-back | Se salta: no umidificatore |
-| **220V AC** | Fusibile F_HEAT 1A SB | **Termostato meccanico** | **Se SSR rimane acceso: termostato interviene** |
+| **220V AC** | Fusibile F_HEAT 2A SB | **Termostato meccanico 55°C** | **Se SSR rimane acceso: termostato interviene** |
 
 ---
 
